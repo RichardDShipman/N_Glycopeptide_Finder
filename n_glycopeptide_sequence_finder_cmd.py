@@ -2,7 +2,7 @@
 n_glycopeptide_finder_cmd.py
 
 This script processes a FASTA file to identify N-glycopeptides based on protease cleavage rules, 
-predicts their masses, and calculates their hydrophobicity. The results are written to a CSV file.
+predicts their masses, calculates their hydrophobicity, and calculates their pI. The results are written to a CSV file.
 
 Functions:
     cleave_sequence(sequence, protease, missed_cleavages):
@@ -16,6 +16,9 @@ Functions:
     
     predict_hydrophobicity(peptide_sequence):
         Predicts the hydrophobicity of a peptide sequence using the Kyte-Doolittle scale.
+    
+    calculate_pI(peptide_sequence):
+        Calculates the isoelectric point (pI) of a peptide sequence.
     
     process_fasta(file, protease, missed_cleavages):
         Processes the input FASTA file and extracts glycopeptides.
@@ -36,6 +39,7 @@ import argparse
 import csv
 import re
 from Bio import SeqIO
+from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 from pyteomics.mass import calculate_mass
 
 # Define protease cleavage rules
@@ -45,7 +49,6 @@ proteases = {
     "glu-c": ("E", None),  # Cleaves after E
     "lys-c": ("K", None),  # Cleaves after K
     "arg-c": ("R", None),  # Cleaves after R
-    "asp-n": (None, "[BD]"),  # Cleaves before D (and sometimes B)
     "pepsin": ("[FLWY]", None),  # Cleaves after F, W, or Y unless followed
 }
 
@@ -90,6 +93,11 @@ def predict_hydrophobicity(peptide_sequence):
 
     return average_hydrophobicity
 
+def calculate_pI(peptide_sequence):
+    """Calculates the isoelectric point (pI) of a peptide sequence."""
+    pI_calculator = IsoelectricPoint(peptide_sequence)
+    return round(pI_calculator.pi(), 2)
+
 def process_fasta(file, protease, missed_cleavages):
     """Processes the input FASTA file and extracts glycopeptides."""
     results = []
@@ -101,6 +109,7 @@ def process_fasta(file, protease, missed_cleavages):
         for peptide, site in n_glycopeptides:
             mass = calculate_peptide_mass(peptide)
             hydrophobicity = predict_hydrophobicity(peptide)
+            pI = calculate_pI(peptide)
             start_pos = sequence.find(peptide) + 1  # 1-based indexing
             end_pos = start_pos + len(peptide)
             results.append({
@@ -113,13 +122,14 @@ def process_fasta(file, protease, missed_cleavages):
                 "NSequon": sequence[site - 1:site + 2],
                 "PredictedMass": mass,
                 "Hydrophobicity": hydrophobicity,
+                "pI": pI,
             })
     return results
 
 def write_csv(output_file, data):
     """Writes results to a CSV file."""
     with open(output_file, mode="w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=["ProteinID", "Peptide", "Site", "Start", "End", "Length", "NSequon", "PredictedMass", "Hydrophobicity"])
+        writer = csv.DictWriter(file, fieldnames=["ProteinID", "Peptide", "Site", "Start", "End", "Length", "NSequon", "PredictedMass", "Hydrophobicity", "pI"])
         writer.writeheader()
         writer.writerows(data)
 
