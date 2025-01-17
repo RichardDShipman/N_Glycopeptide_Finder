@@ -1,10 +1,10 @@
-# N-Glycopeptide Finder
+# N_Glycopeptide_Sequence_Finder
 
 17JAN2025 -- Richard Shipman
 
 ## Overview
 
-Glycopeptide Finder is a Python script designed to process protein sequences from a FASTA file, cleave them using user-specified proteases, identify N-linked glycopeptides, and calculate their properties, such as mass and glycosylation sites. The output is written to a CSV file, enabling easy integration into downstream analyses.
+Glycopeptide Sequence Finder is a Python script designed to process protein sequences from a FASTA file, digest/cleave them using user-specified proteases, identify N-linked glycopeptides, and calculate their properties, such as mass, hydrophobicity, and glycosylation sites. The output is written to a CSV file, enabling easy integration into downstream analyses.
 
 ## Features
 
@@ -19,6 +19,8 @@ Glycopeptide Finder is a Python script designed to process protein sequences fro
         - **Pepsin:** Cleaves after F, L, W, or Y.
 2. **Missed Cleavages:**
     - Allows specifying the number of missed cleavages to simulate incomplete digestion.
+3. **Peptide Property Calculation:**
+    - Calculates peptide mass, hydrophobicity, and isoelectric point (pI).
 
 ## Requirements
 
@@ -43,7 +45,7 @@ pip install biopython pyteomics
 Run the script from the command line with the following arguments:
 
 ```sh
-python glycopeptide_finder.py -i <input_fasta> [-o <output_csv>] [-p <protease>] [-c <missed_cleavages>]
+python n_glycopeptide_finder_cmd.py -i <input_fasta> [-o <output_csv>] [-p <protease>] [-c <missed_cleavages>]
 ```
 
 ### Arguments
@@ -56,7 +58,7 @@ python glycopeptide_finder.py -i <input_fasta> [-o <output_csv>] [-p <protease>]
 ### Example
 
 ```sh
-python glycopeptide_finder.py -i example.fasta -p chymotrypsin -c 1
+python n_glycopeptide_finder_cmd.py -i example.fasta -p chymotrypsin -c 1
 ```
 
 The output file will be named:
@@ -66,12 +68,12 @@ The output file will be named:
 ### Example CSV Content
 
 ```csv
-ProteinID,Peptide,Site,Start,End,Length,NSequon,PredictedMass,Hydrophobicity
-sp|A0A0B7P3V8|YP41B_YEAST,NVIDDNISAR,16,11,21,10,NIS,1115.55710069347,-0.43
-sp|A0A0B7P3V8|YP41B_YEAST,TNDTVR,28,27,33,6,NDT,704.3453170220799,-1.45
-sp|A0A0B7P3V8|YP41B_YEAST,EGLGESLDIMNTNTTDIFR,211,199,218,19,NTT,2124.99974879832,-0.42
-sp|A0A0B7P3V8|YP41B_YEAST,ELRPDSTNFSK,368,361,372,11,NFS,1292.63607929016,-1.47
-sp|A0A0B7P3V8|YP41B_YEAST,LVIIDTGSGVNITNDK,420,410,426,16,NIT,1657.88866514437,0.3
+ProteinID,Peptide,Site,Start,End,Length,NSequon,PredictedMass,Hydrophobicity,pI
+sp|A0A0B7P3V8|YP41B_YEAST,NVIDDNISAR,16,11,21,10,NIS,1115.55710069347,-0.43,4.21
+sp|A0A0B7P3V8|YP41B_YEAST,TNDTVR,28,27,33,6,NDT,704.3453170220799,-1.45,5.5
+sp|A0A0B7P3V8|YP41B_YEAST,EGLGESLDIMNTNTTDIFR,211,199,218,19,NTT,2124.99974879832,-0.42,4.05
+sp|A0A0B7P3V8|YP41B_YEAST,ELRPDSTNFSK,368,361,372,11,NFS,1292.63607929016,-1.47,6.17
+sp|A0A0B7P3V8|YP41B_YEAST,LVIIDTGSGVNITNDK,420,410,426,16,NIT,1657.88866514437,0.3,4.21
 ```
 
 ## Protease Rules
@@ -85,7 +87,6 @@ The following proteases are supported:
 | Glu-C        | After E                              |
 | Lys-C        | After K                              |
 | Arg-C        | After R                              |
-| Asp-N        | Before D (and sometimes B)           |
 | Pepsin       | After F, L, W, or Y                  |
 
 ## Notes
@@ -95,7 +96,7 @@ The following proteases are supported:
 
 ## License
 
-This script is released under the MIT License. Feel free to use, modify, and distribute it as needed.
+This script is released under the MIT License. 
 
 ## Acknowledgments
 
