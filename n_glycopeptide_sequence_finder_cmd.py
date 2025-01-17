@@ -114,8 +114,8 @@ def process_fasta(file, protease, missed_cleavages):
             end_pos = start_pos + len(peptide)
             results.append({
                 "ProteinID": protein_id,
-                "Peptide": peptide,
                 "Site": site,
+                "Peptide": peptide,
                 "Start": start_pos,
                 "End": end_pos,
                 "Length": len(peptide),
@@ -129,7 +129,7 @@ def process_fasta(file, protease, missed_cleavages):
 def write_csv(output_file, data):
     """Writes results to a CSV file."""
     with open(output_file, mode="w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=["ProteinID", "Peptide", "Site", "Start", "End", "Length", "NSequon", "PredictedMass", "Hydrophobicity", "pI"])
+        writer = csv.DictWriter(file, fieldnames=["ProteinID", "Site", "Peptide", "Start", "End", "Length", "NSequon", "PredictedMass", "Hydrophobicity", "pI"])
         writer.writeheader()
         writer.writerows(data)
 
