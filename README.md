@@ -65,10 +65,14 @@ The output file will be named:
 
 ### Example CSV Content
 
-| ProteinID | Peptide | Site | Length | NSequon | PredictedMass |
-|-----------|---------|------|--------|---------|---------------|
-| P12345    | NTTKPN  | 10   | 6      | NTT     | 748.35        |
-| P12345    | WFNST   | 25   | 5      | NST     | 643.28        |
+```csv
+ProteinID,Peptide,Site,Start,End,Length,NSequon,PredictedMass,Hydrophobicity
+sp|A0A0B7P3V8|YP41B_YEAST,NVIDDNISAR,16,11,21,10,NIS,1115.55710069347,-0.43
+sp|A0A0B7P3V8|YP41B_YEAST,TNDTVR,28,27,33,6,NDT,704.3453170220799,-1.45
+sp|A0A0B7P3V8|YP41B_YEAST,EGLGESLDIMNTNTTDIFR,211,199,218,19,NTT,2124.99974879832,-0.42
+sp|A0A0B7P3V8|YP41B_YEAST,ELRPDSTNFSK,368,361,372,11,NFS,1292.63607929016,-1.47
+sp|A0A0B7P3V8|YP41B_YEAST,LVIIDTGSGVNITNDK,420,410,426,16,NIT,1657.88866514437,0.3
+```
 
 ## Protease Rules
 

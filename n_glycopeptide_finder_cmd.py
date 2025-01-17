@@ -68,7 +68,7 @@ def process_fasta(file, protease, missed_cleavages):
             mass = calculate_peptide_mass(peptide)
             hydrophobicity = predict_hydrophobicity(peptide)
             start_pos = sequence.find(peptide) + 1  # 1-based indexing
-            end_pos = start_pos + len(peptide) - 1
+            end_pos = start_pos + len(peptide)
             results.append({
                 "ProteinID": protein_id,
                 "Peptide": peptide,
