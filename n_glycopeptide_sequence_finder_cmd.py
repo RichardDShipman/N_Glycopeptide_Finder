@@ -49,19 +49,30 @@ proteases = {
     "glu-c": ("E", None),  # Cleaves after E
     "lys-c": ("K", None),  # Cleaves after K
     "arg-c": ("R", None),  # Cleaves after R
-    "pepsin": ("[FLWY]", None),  # Cleaves after F, W, or Y unless followed
+    "pepsin": ("[FLWY]", None),  # Cleaves after F, W, or Y
+    "asp-n": ("D", None),  # Cleaves **before** Asp (D)
+    "proteinase-k": ("[AFILVWY]", None),  # Cleaves after A, F, I, L, V, W, Y
 }
 
-def cleave_sequence(sequence, protease, missed_cleavages):
+def cleave_sequence(sequence, protease, missed_cleavages=0):
     """Cleaves a sequence based on protease rules."""
     cleavage_pattern, exclusion = proteases[protease.lower()]
-    regex = rf"(?<={cleavage_pattern})(?!{exclusion})"
+
+    # Handle Asp-N separately because it cleaves **before** D
+    if protease.lower() == "asp-n":
+        regex = rf"(?={cleavage_pattern})"  # Cleaves before D
+    else:
+        regex = rf"(?<={cleavage_pattern})(?!{exclusion})"  # Cleaves after other residues
+
+    # Perform cleavage
     fragments = re.split(regex, sequence)
 
+    # Generate peptides including missed cleavages
     peptides = []
     for i in range(len(fragments)):
         for j in range(i + 1, min(i + 2 + missed_cleavages, len(fragments) + 1)):
             peptides.append("".join(fragments[i:j]))
+    
     return peptides
 
 def find_n_glycopeptides(peptides, full_sequence):
@@ -76,7 +87,10 @@ def find_n_glycopeptides(peptides, full_sequence):
     return glycopeptides
 
 def calculate_peptide_mass(sequence):
-    """Calculates the mass of a peptide."""
+    """Calculates the mass of a peptide, ignoring sequences with unknown residues."""
+    invalid_residues = {"X", "B", "Z", "J", "U", "O"}  # Common ambiguous residues
+    if any(aa in invalid_residues for aa in sequence):
+        return "Unknown"  # Or return None if you prefer
     return calculate_mass(sequence=sequence)
 
 def predict_hydrophobicity(peptide_sequence):
@@ -136,27 +150,30 @@ def write_csv(output_file, data):
 def main():
     parser = argparse.ArgumentParser(description="Glycopeptide Finder")
     parser.add_argument("-i", "--input", required=True, help="Input FASTA file")
-    parser.add_argument("-o", "--output", help="Output CSV file")
-    parser.add_argument("-p", "--protease", default="trypsin", help="Protease to use for cleavage")
+    parser.add_argument("-o", "--output", help="Output CSV file prefix")
+    parser.add_argument("-p", "--protease", default="trypsin", help="Protease to use for cleavage ('all' for all proteases)")
     parser.add_argument("-c", "--missed_cleavages", type=int, default=0, help="Number of missed cleavages allowed")
 
     args = parser.parse_args()
 
     input_file = args.input
     base_filename = input_file.rsplit(".", 1)[0]
-    protease = args.protease.lower()
     missed_cleavages = args.missed_cleavages
 
-    if protease not in proteases:
-        print(f"Protease {protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
+    # If "all" is selected, process all proteases
+    if args.protease.lower() == "all":
+        selected_proteases = list(proteases.keys())  # All available proteases
+    elif args.protease.lower() in proteases:
+        selected_proteases = [args.protease.lower()]
+    else:
+        print(f"Protease {args.protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
         return
 
-    # Generate output file name
-    output_file = args.output or f"{base_filename}_predicted_{protease}_glycopeptides.csv"
-
-    results = process_fasta(input_file, protease, missed_cleavages)
-    write_csv(output_file, results)
-    print(f"Results written to {output_file}")
+    for protease in selected_proteases:
+        output_file = args.output or f"{base_filename}_predicted_{protease}_glycopeptides.csv"
+        results = process_fasta(input_file, protease, missed_cleavages)
+        write_csv(output_file, results)
+        print(f"Results for {protease} written to {output_file}")
 
 if __name__ == "__main__":
     main()
