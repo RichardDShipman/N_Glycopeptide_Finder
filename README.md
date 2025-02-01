@@ -108,6 +108,10 @@ The following proteases are supported:
 1. The script assumes well-formatted FASTA input files.
 2. Only N-linked glycosylation sequons are detected (no O-linked or other modifications).
 
+## Merging CSV Files
+
+The script includes a function to merge all CSV files from a specified directory into a single CSV file. This can be useful for consolidating the results of multiple digestions into one file for easier analysis.
+
 ## License
 
 This script is released under the MIT License. 
