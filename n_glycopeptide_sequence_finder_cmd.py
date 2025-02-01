@@ -77,7 +77,7 @@ def cleave_sequence(sequence, protease, missed_cleavages=0):
 
 def find_n_glycopeptides(peptides, full_sequence):
     """Identifies peptides containing N-glycosylation sequons and maps the sites to the full protein sequence."""
-    n_glyco_sequon = re.compile("N[^P][ST]")
+    n_glyco_sequon = re.compile("N[^P][STC]") # N-glycosylation sequon
     glycopeptides = []
     for pep in peptides:
         for match in n_glyco_sequon.finditer(pep):
@@ -133,7 +133,7 @@ def process_fasta(file, protease, missed_cleavages):
                 "Start": start_pos,
                 "End": end_pos,
                 "Length": len(peptide),
-                "NSequon": sequence[site - 1:site + 2],
+                "NSequon": sequence[site - 1:site + 3], # Extract the sequon amino acid sequence + 1 flanking residue
                 "PredictedMass": mass,
                 "Hydrophobicity": hydrophobicity,
                 "pI": pI,

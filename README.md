@@ -4,7 +4,7 @@
 
 ## Overview
 
-Glycopeptide Sequence Finder is a Python script designed to process protein sequences from a FASTA file, digest/cleave them using user-specified proteases, identify N-linked glycopeptides, and calculate their properties, such as mass, hydrophobicity, and glycosylation sites. The output is written to a CSV file, enabling easy integration into downstream analyses.
+Glycopeptide Sequence Finder is a Python script designed to process protein sequences from a FASTA file, digest/cleave them using user-specified proteases, identify N-linked glycopeptides using N-sequon "N[^P][STC]" (NX[STC], X NOT P), and calculate their properties, such as mass, hydrophobicity, and glycosylation sites. The output is written to a CSV file, enabling easy integration into downstream analyses.
 
 ## Features
 
@@ -18,7 +18,7 @@ Glycopeptide Sequence Finder is a Python script designed to process protein sequ
         - **Asp-N:** Cleaves before D.
         - **Pepsin:** Cleaves after F, L, W, or Y.
         - **Proteinase K:** Cleaves after A, F, I, L, V, W, or Y.
-        - **all:** Runs all proteases above.
+        - **All:** Runs all proteases above.
 2. **Missed Cleavages:**
     - Allows specifying the number of missed cleavages to simulate incomplete digestion.
 3. **Peptide Property Calculation:**
@@ -71,30 +71,37 @@ The output file will be named:
 
 ```csv
 ProteinID,Site,Peptide,Start,End,Length,NSequon,PredictedMass,Hydrophobicity,pI
-sp|A0A087X1C5|CP2D7_HUMAN,416,GTTLITNLSSVLK,410,423,13,NLS,1345.78168089469,0.66,8.75
-sp|A0A0K2S4Q6|CD3CH_HUMAN,100,SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLT,3085.50915394004,-0.23,4.05
-sp|A0A1B0GTW7|CIROP_HUMAN,333,ENCSTR,332,338,6,NCS,708.2860878938,-1.75,6.09
-sp|A0A1B0GTW7|CIROP_HUMAN,425,DSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDK,418,472,54,NHS,5720.534757730061,-0.22,4.56
-sp|A0A1B0GTW7|CIROP_HUMAN,491,MYKPLANGSECWK,485,498,13,NGS,1525.70575615645,-0.75,7.93
-sp|A0A1B0GTW7|CIROP_HUMAN,524,CFFANLTSQLLPGDKPR,520,537,17,NLT,1905.9771033092898,-0.16,8.22
-sp|A0A1B0GTW7|CIROP_HUMAN,713,KPLEVYHGGANFTTQPSK,703,721,18,NFT,1973.00067520484,-0.91,8.51
-sp|A0AV02|S12A8_HUMAN,221,LQLLLLFLLAVSTLDFVVGSFTHLDPEHGFIGYSPELLQNNTLPDYSPGESFFTVFGVFFPAATGVMAGFNMGGDLR,182,259,77,NNT,8353.194115527771,0.56,4.14
-sp|A0AV02|S12A8_HUMAN,561,SEGTQPEGTYGEQLVPELCNQSESSGEDFFLK,542,574,32,NQS,3504.5514893278296,-0.92,4.05
-sp|A0AV02|S12A8_HUMAN,645,ASPGLHLGSASNFSFFR,634,651,17,NFS,1793.88491717661,0.16,9.8
+sp|A0A087X1C5|CP2D7_HUMAN,416,GTTLITNLSSVLK,410,423,13,NLSS,1345.78168089469,0.66,8.75
+sp|A0A0K2S4Q6|CD3CH_HUMAN,100,SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,3085.50915394004,-0.23,4.05
+sp|A0A1B0GTW7|CIROP_HUMAN,333,ENCSTR,332,338,6,NCST,708.2860878938,-1.75,6.09
+sp|A0A1B0GTW7|CIROP_HUMAN,425,DSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDK,418,472,54,NHSA,5720.534757730061,-0.22,4.56
+sp|A0A1B0GTW7|CIROP_HUMAN,491,MYKPLANGSECWK,485,498,13,NGSE,1525.70575615645,-0.75,7.93
+sp|A0A1B0GTW7|CIROP_HUMAN,524,CFFANLTSQLLPGDKPR,520,537,17,NLTS,1905.9771033092898,-0.16,8.22
+sp|A0A1B0GTW7|CIROP_HUMAN,713,KPLEVYHGGANFTTQPSK,703,721,18,NFTT,1973.00067520484,-0.91,8.51
+sp|A0AV02|S12A8_HUMAN,221,LQLLLLFLLAVSTLDFVVGSFTHLDPEHGFIGYSPELLQNNTLPDYSPGESFFTVFGVFFPAATGVMAGFNMGGDLR,182,259,77,NNTL,8353.194115527771,0.56,4.14
+sp|A0AV02|S12A8_HUMAN,561,SEGTQPEGTYGEQLVPELCNQSESSGEDFFLK,542,574,32,NQSE,3504.5514893278296,-0.92,4.05
+sp|A0AV02|S12A8_HUMAN,645,ASPGLHLGSASNFSFFR,634,651,17,NFSF,1793.88491717661,0.16,9.8
+sp|A0AV96|RBM47_HUMAN,302,EDAVHAMNNLNGTELEGSCLEVTLAKPVDK,292,322,30,NGTE,3196.53802862351,-0.32,4.35
+sp|A0AVF1|IFT56_HUMAN,82,ALEEYENATK,76,86,10,NATK,1166.5455329502602,-1.25,4.25
+sp|A0AVF1|IFT56_HUMAN,248,SLMDNASSSFEFAK,244,258,14,NASS,1532.6817091532398,-0.19,4.37
+sp|A0AVF1|IFT56_HUMAN,408,AATGNTSEGEEAFLLIQSEK,404,424,20,NTSE,2094.01169338101,-0.42,4.09
 ```
 
 ## Protease Rules
 
 The following proteases are supported:
 
-| Protease     | Cleavage Rule                        |
-|--------------|--------------------------------------|
-| Trypsin      | After K or R, not P                  |
-| Chymotrypsin | After F, W, or Y, not P              |
-| Glu-C        | After E                              |
-| Lys-C        | After K                              |
-| Arg-C        | After R                              |
-| Pepsin       | After F, L, W, or Y                  |
+| Protease      | Cleavage Rule                        |
+|---------------|--------------------------------------|
+| Trypsin       | After K or R, not P                  |
+| Chymotrypsin  | After F, W, or Y, not P              |
+| Glu-C         | After E                              |
+| Lys-C         | After K                              |
+| Arg-C         | After R                              |
+| Asp-N         | Before D                             |
+| Pepsin        | After F, L, W, or Y                  |
+| Proteinase K  | After A, F, I, L, V, W, or Y         |
+| All           | Runs all proteases above             |
 
 ## Notes
 
@@ -106,6 +113,10 @@ The following proteases are supported:
 This script is released under the MIT License. 
 
 ## Acknowledgments
+
+- The Hitchhiker’s Guide to Glycoproteomics
+
+Oliveira, Tiago, Morten Thaysen-Andersen, Nicolle Packer, and Daniel Kolarich. “The Hitchhiker’s Guide to Glycoproteomics.” Biochemical Society Transactions 49 (July 20, 2021). https://doi.org/10.1042/BST20200879.
 
 - BioPython for handling FASTA files.
 
