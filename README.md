@@ -112,6 +112,14 @@ The following proteases are supported:
 
 The script includes a function to merge all CSV files from a specified directory into a single CSV file. This can be useful for consolidating the results of multiple digestions into one file for easier analysis.
 
+## Batch Run
+
+To process multiple FASTA files in parallel using all proteases, run the following command:
+
+```sh
+./batch_n_glycopeptide_sequence_finder.sh
+```
+
 ## License
 
 This script is released under the MIT License. 

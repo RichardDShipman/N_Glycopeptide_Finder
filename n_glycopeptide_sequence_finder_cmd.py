@@ -41,6 +41,7 @@ import re
 from Bio import SeqIO
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 from pyteomics.mass import calculate_mass
+import os
 
 # Define protease cleavage rules
 proteases = {
@@ -169,8 +170,15 @@ def main():
         print(f"Protease {args.protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
         return
 
+    # Ensure the output directory exists
+    output_dir = "digested_glycopeptide_library"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Extract the base filename without any directory path
+    base_filename = os.path.basename(base_filename)
+
     for protease in selected_proteases:
-        output_file = args.output or f"{base_filename}_predicted_{protease}_glycopeptides.csv"
+        output_file = args.output or f"{output_dir}/{base_filename}_predicted_{protease}_glycopeptides.csv"
         results = process_fasta(input_file, protease, missed_cleavages)
         write_csv(output_file, results)
         print(f"Results for {protease} written to {output_file}")
