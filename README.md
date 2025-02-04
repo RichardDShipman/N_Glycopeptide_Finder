@@ -73,7 +73,7 @@ python glycopeptide_finder_cmd.py -i test_proteomes/human_uniprotkb_proteome_UP0
 
 The output file will be named:
 
-`example_predicted_chymotrypsin_glycopeptides.csv`
+`example_predicted_trypsin_glycopeptides.csv`
 
 ### Example CSV Content
 
@@ -107,9 +107,9 @@ The following proteases are supported:
 | Proteinase K  | After A, F, I, L, V, W, or Y         |
 | All           | Runs all proteases above             |
 
-## Glycosylation Types
+## Glycosylation Type Rules
 
-The following glycosylation types are supported:
+The following glycosylation types sequons (motifs) are supported:
 
 | Glycosylation Type | Sequon Pattern |
 |--------------------|----------------|
@@ -173,6 +173,48 @@ The script includes a function to merge all CSV files from a specified directory
 python merge_digested_glycopeptide_library.py
 ```
 
+## License
+
+This script is released under the MIT License. 
+
+## Acknowledgments
+
+- The Hitchhiker’s Guide to Glycoproteomics
+
+Oliveira, Tiago, Morten Thaysen-Andersen, Nicolle Packer, and Daniel Kolarich. “The Hitchhiker’s Guide to Glycoproteomics.” Biochemical Society Transactions 49 (July 20, 2021). https://doi.org/10.1042/BST20200879.
+
+- In Silico Platform for Prediction of N-, O- and C-Glycosites in Eukaryotic Protein Sequences.
+
+Chauhan, Jagat Singh, Alka Rao, and Gajendra P. S. Raghava. “In Silico Platform for Prediction of N-, O- and C-Glycosites in Eukaryotic Protein Sequences.” PLoS ONE 8, no. 6 (June 28, 2013): e67008. https://doi.org/10.1371/journal.pone.0067008.
+
+- BioPython for handling FASTA files.
+
+Cock, P. J., Antao, T., Chang, J. T., Chapman, B. A., Cox, C. J., Dalke, A., … others. (2009). Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics, 25(11), 1422–1423.
+
+- Pyteomics for accurate peptide mass calculations.
+
+Goloborodko, A.A.; Levitsky, L.I.; Ivanov, M.V.; and Gorshkov, M.V. (2013) “Pyteomics - a Python Framework for Exploratory Data Analysis and Rapid Software Prototyping in Proteomics”, Journal of The American Society for Mass Spectrometry, 24(2), 301–304. DOI: 10.1007/s13361-012-0516-6
+
+Levitsky, L.I.; Klein, J.; Ivanov, M.V.; and Gorshkov, M.V. (2018) “Pyteomics 4.0: five years of development of a Python proteomics framework”, Journal of Proteome Research. DOI: 10.1021/acs.jproteome.8b00717
+
+# Appendix
+
+Additional information and references.
+
+### Notes
+
+1. The script assumes well-formatted FASTA input files.
+2. Only N-linked glycosylation sequons are detected (no O-linked or other modifications).
+3. FASTA protein files contain new lines and or return carrages. When returning to the FASTA, remember this when searching for peptide in original sequence. 
+
+```
+for file in ./test_proteomes/*; do
+  filename=$(basename "$file")
+  part_before_underscore="${filename%%_*}"
+  echo "$part_before_underscore"
+done
+```
+
 ## Test Proteomes
 
 Test proteome files from UniProt are available in the `test_proteomes` folder. Below is a list of species gathered. Only reviewed proteins were downloaded, and not every sequence available for a species is included.
@@ -210,41 +252,3 @@ Test proteome files from UniProt are available in the `test_proteomes` folder. B
 | Squirrel      | Ictidomys tridecemlineatus                                                      | 43179                   |
 | Yeast         | Saccharomyces cerevisiae (strain ATCC 204508 / S288c)                           | 559292                  |
 | Zebrafish     | Danio rerio                                                                     | 7955                    |
-
-### Notes
-
-1. The script assumes well-formatted FASTA input files.
-2. Only N-linked glycosylation sequons are detected (no O-linked or other modifications).
-3. FASTA protein files contain new lines and or return carrages. When returning to the FASTA, remember this when searching for peptide in original sequence. 
-
-```
-for file in ./test_proteomes/*; do
-  filename=$(basename "$file")
-  part_before_underscore="${filename%%_*}"
-  echo "$part_before_underscore"
-done
-```
-
-## License
-
-This script is released under the MIT License. 
-
-## Acknowledgments
-
-- The Hitchhiker’s Guide to Glycoproteomics
-
-Oliveira, Tiago, Morten Thaysen-Andersen, Nicolle Packer, and Daniel Kolarich. “The Hitchhiker’s Guide to Glycoproteomics.” Biochemical Society Transactions 49 (July 20, 2021). https://doi.org/10.1042/BST20200879.
-
-- In Silico Platform for Prediction of N-, O- and C-Glycosites in Eukaryotic Protein Sequences.
-
-Chauhan, Jagat Singh, Alka Rao, and Gajendra P. S. Raghava. “In Silico Platform for Prediction of N-, O- and C-Glycosites in Eukaryotic Protein Sequences.” PLoS ONE 8, no. 6 (June 28, 2013): e67008. https://doi.org/10.1371/journal.pone.0067008.
-
-- BioPython for handling FASTA files.
-
-Cock, P. J., Antao, T., Chang, J. T., Chapman, B. A., Cox, C. J., Dalke, A., … others. (2009). Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics, 25(11), 1422–1423.
-
-- Pyteomics for accurate peptide mass calculations.
-
-Goloborodko, A.A.; Levitsky, L.I.; Ivanov, M.V.; and Gorshkov, M.V. (2013) “Pyteomics - a Python Framework for Exploratory Data Analysis and Rapid Software Prototyping in Proteomics”, Journal of The American Society for Mass Spectrometry, 24(2), 301–304. DOI: 10.1007/s13361-012-0516-6
-
-Levitsky, L.I.; Klein, J.; Ivanov, M.V.; and Gorshkov, M.V. (2018) “Pyteomics 4.0: five years of development of a Python proteomics framework”, Journal of Proteome Research. DOI: 10.1021/acs.jproteome.8b00717
