@@ -47,7 +47,7 @@ pip install argparse biopython pyteomics
 Run the script from the command line with the following arguments:
 
 ```sh
-python n_glycopeptide_finder_cmd.py -i <input_fasta> [-o <output_csv>] [-p <protease>] [-c <missed_cleavages>] [-l <log.txt>] [-v <verbose>]
+python n_glycopeptide_finder_cmd.py -i <input_fasta> [-o <output_csv>] [-p <protease>] [-g <glycosylation>] [-c <missed_cleavages>] [-l <log.txt>] [-v]
 ```
 
 ### Arguments
@@ -55,6 +55,7 @@ python n_glycopeptide_finder_cmd.py -i <input_fasta> [-o <output_csv>] [-p <prot
 - `-i`, `--input` (required): Path to the input FASTA file.
 - `-o`, `--output` (optional): Path to the output CSV file. If omitted, a default name is generated.
 - `-p`, `--protease` (optional): Protease to use for cleavage. Default is trypsin.
+- `-g`, `--glycosylation` (optional): Glycosylation sequon to find in peptides. Default is N-linked. (N, O, C) Warning when using O or C, experimental.
 - `-c`, `--missed_cleavages` (optional): Number of missed cleavages allowed. Default is 0.
 - `-l log.txt`, `--log log.txt` (optional): Path to the log file. If omitted, logging is disabled.
 - `-v`, `--verbose` (optional): Enable verbose output. Default is False.
@@ -62,7 +63,7 @@ python n_glycopeptide_finder_cmd.py -i <input_fasta> [-o <output_csv>] [-p <prot
 ### Example
 
 ```sh
-python n_glycopeptide_finder_cmd.py -i test_proteomes/human_uniprotkb_proteome_UP000005640_AND_revi_2025_01_17.fasta -p trypsin -c 0
+python glycopeptide_finder_cmd.py -i test_proteomes/human_uniprotkb_proteome_UP000005640_AND_revi_2025_01_17.fasta -p trypsin -g N -c 0
 ```
 
 The output file will be named:
@@ -71,22 +72,18 @@ The output file will be named:
 
 ### Example CSV Content
 
-```csv
-ProteinID,Site,Peptide,Start,End,Length,NSequon,PredictedMass,Hydrophobicity,pI
-sp|A0A087X1C5|CP2D7_HUMAN,416,GTTLITNLSSVLK,410,423,13,NLSS,1345.78168089469,0.66,8.75
-sp|A0A0K2S4Q6|CD3CH_HUMAN,100,SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,3085.50915394004,-0.23,4.05
-sp|A0A1B0GTW7|CIROP_HUMAN,333,ENCSTR,332,338,6,NCST,708.2860878938,-1.75,6.09
-sp|A0A1B0GTW7|CIROP_HUMAN,425,DSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDK,418,472,54,NHSA,5720.534757730061,-0.22,4.56
-sp|A0A1B0GTW7|CIROP_HUMAN,491,MYKPLANGSECWK,485,498,13,NGSE,1525.70575615645,-0.75,7.93
-sp|A0A1B0GTW7|CIROP_HUMAN,524,CFFANLTSQLLPGDKPR,520,537,17,NLTS,1905.9771033092898,-0.16,8.22
-sp|A0A1B0GTW7|CIROP_HUMAN,713,KPLEVYHGGANFTTQPSK,703,721,18,NFTT,1973.00067520484,-0.91,8.51
-sp|A0AV02|S12A8_HUMAN,221,LQLLLLFLLAVSTLDFVVGSFTHLDPEHGFIGYSPELLQNNTLPDYSPGESFFTVFGVFFPAATGVMAGFNMGGDLR,182,259,77,NNTL,8353.194115527771,0.56,4.14
-sp|A0AV02|S12A8_HUMAN,561,SEGTQPEGTYGEQLVPELCNQSESSGEDFFLK,542,574,32,NQSE,3504.5514893278296,-0.92,4.05
-sp|A0AV02|S12A8_HUMAN,645,ASPGLHLGSASNFSFFR,634,651,17,NFSF,1793.88491717661,0.16,9.8
-sp|A0AV96|RBM47_HUMAN,302,EDAVHAMNNLNGTELEGSCLEVTLAKPVDK,292,322,30,NGTE,3196.53802862351,-0.32,4.35
-sp|A0AVF1|IFT56_HUMAN,82,ALEEYENATK,76,86,10,NATK,1166.5455329502602,-1.25,4.25
-sp|A0AVF1|IFT56_HUMAN,248,SLMDNASSSFEFAK,244,258,14,NASS,1532.6817091532398,-0.19,4.37
-sp|A0AVF1|IFT56_HUMAN,408,AATGNTSEGEEAFLLIQSEK,404,424,20,NTSE,2094.01169338101,-0.42,4.09
+```CSV
+ProteinID,Site,Peptide,Start,End,Length,Sequon,PredictedMass,Hydrophobicity,pI,Protease,GlycosylationType,MissedCleavages,Species,TaxonID,GeneName,ProteinEvidence,SequenceVersion
+sp|A0A087X1C5|CP2D7_HUMAN,416,GTTLITNLSSVLK,410,423,13,NLSS,1345.78168089469,0.66,8.75,trypsin,N,0,Homo sapiens,9606,CYP2D7,5,1
+sp|A0A0K2S4Q6|CD3CH_HUMAN,100,SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,3085.50915394004,-0.23,4.05,trypsin,N,0,Homo sapiens,9606,CD300H,1,1
+sp|A0A1B0GTW7|CIROP_HUMAN,333,ENCSTR,332,338,6,NCST,708.2860878938,-1.75,6.09,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
+sp|A0A1B0GTW7|CIROP_HUMAN,425,DSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDK,418,472,54,NHSA,5720.534757730061,-0.22,4.56,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
+sp|A0A1B0GTW7|CIROP_HUMAN,491,MYKPLANGSECWK,485,498,13,NGSE,1525.70575615645,-0.75,7.93,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
+sp|A0A1B0GTW7|CIROP_HUMAN,524,CFFANLTSQLLPGDKPR,520,537,17,NLTS,1905.9771033092898,-0.16,8.22,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
+sp|A0A1B0GTW7|CIROP_HUMAN,713,KPLEVYHGGANFTTQPSK,703,721,18,NFTT,1973.00067520484,-0.91,8.51,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
+sp|A0AV02|S12A8_HUMAN,221,LQLLLLFLLAVSTLDFVVGSFTHLDPEHGFIGYSPELLQNNTLPDYSPGESFFTVFGVFFPAATGVMAGFNMGGDLR,182,259,77,NNTL,8353.194115527771,0.56,4.14,trypsin,N,0,Homo sapiens,9606,SLC12A8,1,4
+sp|A0AV02|S12A8_HUMAN,561,SEGTQPEGTYGEQLVPELCNQSESSGEDFFLK,542,574,32,NQSE,3504.5514893278296,-0.92,4.05,trypsin,N,0,Homo sapiens,9606,SLC12A8,1,4
+sp|A0AV02|S12A8_HUMAN,645,ASPGLHLGSASNFSFFR,634,651,17,NFSF,1793.88491717661,0.16,9.8,trypsin,N,0,Homo sapiens,9606,SLC12A8,1,4
 ```
 
 ## Protease Rules
@@ -206,6 +203,10 @@ This script is released under the MIT License.
 - The Hitchhiker’s Guide to Glycoproteomics
 
 Oliveira, Tiago, Morten Thaysen-Andersen, Nicolle Packer, and Daniel Kolarich. “The Hitchhiker’s Guide to Glycoproteomics.” Biochemical Society Transactions 49 (July 20, 2021). https://doi.org/10.1042/BST20200879.
+
+- In Silico Platform for Prediction of N-, O- and C-Glycosites in Eukaryotic Protein Sequences.
+
+Chauhan, Jagat Singh, Alka Rao, and Gajendra P. S. Raghava. “In Silico Platform for Prediction of N-, O- and C-Glycosites in Eukaryotic Protein Sequences.” PLoS ONE 8, no. 6 (June 28, 2013): e67008. https://doi.org/10.1371/journal.pone.0067008.
 
 - BioPython for handling FASTA files.
 
