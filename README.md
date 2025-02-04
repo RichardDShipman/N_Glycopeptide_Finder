@@ -21,6 +21,11 @@ Glycopeptide Sequence Finder is a Python script that processes protein sequences
         - **All:** Runs all proteases above.
 2. **Missed Cleavages:**
     - Allows specifying the number of missed cleavages to simulate incomplete digestion.
+3. **Glycosylation Type:** 
+    - Select from N-linked (N), O-linked (O), or C-linked (C) glycopeptides. (Adjust or add sequon)
+        - **N-linked:** N-sequon “N[^P][STC]"
+        - **O-linked:** O-sequon “[ST]" 
+        - **C-linked:** C-sequon "[W]"
 3. **Peptide Property Calculation:**
     - Calculates peptide mass, hydrophobicity, and isoelectric point (pI).
 
@@ -101,6 +106,16 @@ The following proteases are supported:
 | Pepsin        | After F, L, W, or Y                  |
 | Proteinase K  | After A, F, I, L, V, W, or Y         |
 | All           | Runs all proteases above             |
+
+## Glycosylation Types
+
+The following glycosylation types are supported:
+
+| Glycosylation Type | Sequon Pattern |
+|--------------------|----------------|
+| N-linked           | N[^P][STC]     |
+| O-linked           | [ST]           |
+| C-linked           | [W]            |
 
 ## Log File
 

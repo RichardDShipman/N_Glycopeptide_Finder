@@ -238,7 +238,7 @@ def main():
     base_filename = os.path.basename(base_filename)
 
     for protease in selected_proteases:
-        output_file = args.output or f"{output_dir}/{base_filename}_predicted_{protease}_{glycosylation_type}-glycopeptides.csv"
+        output_file = args.output or f"{output_dir}/{base_filename}_predicted_{protease}_mc_{missed_cleavages}_{glycosylation_type}-glycopeptides.csv"
         results = process_fasta(input_file, protease, missed_cleavages, glycosylation_type)
         write_csv(output_file, results)
         if args.log:
