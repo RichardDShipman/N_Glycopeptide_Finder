@@ -107,7 +107,7 @@ The following proteases are supported:
 The log file provides detailed information about the processing steps, including the number of peptides found after cleavage and the identified N-glycopeptides.
 
 ```bash
-python n_glycopeptide_finder_cmd.py -i test_proteomes/human_uniprotkb_proteome_UP000005640_AND_revi_2025_01_17.fasta -p trypsin -c 0 -l log.txt
+python glycopeptide_finder_cmd.py -i test_proteomes/human_uniprotkb_proteome_UP000005640_AND_revi_2025_01_17.fasta -p trypsin -c 0 -l log.txt
 ```
 
 The script generates a log file that records the processing details of each protein sequence. Logging to a text file can be activated with the `-l log.txt` flag. Below are some example log entries:
@@ -132,7 +132,7 @@ The script generates a log file that records the processing details of each prot
 To process multiple FASTA files in parallel using all proteases, run the following command:
 
 ```sh
-./batch_n_glycopeptide_sequence_finder.sh
+./batch_glycopeptide_sequence_finder.sh
 ```
 
 Parameters can be adjusted in the shell script.
