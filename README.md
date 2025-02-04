@@ -25,7 +25,7 @@ Glycopeptide Sequence Finder is a Python script that processes protein sequences
     - Select from N-linked (N), O-linked (O), or C-linked (C) glycopeptides. (Adjust or add sequon)
         - **N-linked:** N-sequon “N[^P][STC]"
         - **O-linked:** O-sequon “[ST]" 
-        - **C-linked:** C-sequon "[W]"
+        - **C-linked:** C-sequon "W..[WCF]"
 3. **Peptide Property Calculation:**
     - Calculates peptide mass, hydrophobicity, and isoelectric point (pI).
 
@@ -115,7 +115,7 @@ The following glycosylation types sequons (motifs) are supported:
 |--------------------|----------------|
 | N-linked           | N[^P][STC]     |
 | O-linked           | [ST]           |
-| C-linked           | [W]            |
+| C-linked           | W..[WCF]       |
 
 ## Batch Run
 

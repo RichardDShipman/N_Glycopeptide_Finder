@@ -58,9 +58,9 @@ proteases = {
 
 # Define glycosylation rules
 glycosylation = {
-    "N": ("N[^P][STC]"),  # N-glycosylation sequon
-    "O": ("[ST]"),  # O-glycosylation sequon (experimental! Creates large number of O-glycopeptides.)
-    "C": ("W")  # C-glycosylation sequon - tryoptophan (W) only.
+    "N": ("N[^P][STC]"),  # N-glycosylation sequon - N-X-S/T/C (X is any amino acid except P).
+    "O": ("[ST]"),  # O-glycosylation sequon - S/T  (experimental! Creates large number of O-glycopeptides.)
+    "C": ("W..[WCF]")  # C-glycosylation sequon - W-X-X-W, W-X-X-C, or W-X-X-F (X is any amino acid).
 }
 
 def cleave_sequence(sequence, protease, missed_cleavages=0):
