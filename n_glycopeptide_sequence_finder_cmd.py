@@ -33,7 +33,7 @@ Usage:
     python n_glycopeptide_finder_cmd.py -i <input_fasta_file> -o <output_csv_file> -p <protease> -c <missed_cleavages>
 
 Author:
-    Richard Shipman
+    Richard Shipman -- 2025
 """
 import argparse
 import csv
@@ -42,6 +42,7 @@ from Bio import SeqIO
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 from pyteomics.mass import calculate_mass
 import os
+import logging
 
 # Define protease cleavage rules
 proteases = {
@@ -113,14 +114,22 @@ def calculate_pI(peptide_sequence):
     pI_calculator = IsoelectricPoint(peptide_sequence)
     return round(pI_calculator.pi(), 2)
 
+def setup_logging(log_file):
+    """Sets up logging to a file."""
+    logging.basicConfig(filename=log_file, level=logging.INFO, 
+                        format='%(asctime)s - %(levelname)s - %(message)s')
+
 def process_fasta(file, protease, missed_cleavages):
     """Processes the input FASTA file and extracts glycopeptides."""
     results = []
     for record in SeqIO.parse(file, "fasta"):
         protein_id = record.id
         sequence = str(record.seq)
+        logging.info(f"Processing {protein_id} with {len(sequence)} amino acids.")        
         peptides = cleave_sequence(sequence, protease, missed_cleavages)
+        logging.info(f"Found {len(peptides)} peptides after {protease} cleavage. The peptides were: {peptides}")
         n_glycopeptides = find_n_glycopeptides(peptides, sequence)
+        logging.info(f"Found {len(n_glycopeptides)} N-glycopeptides. The glycopeptides were: {n_glycopeptides}")
         for peptide, site in n_glycopeptides:
             mass = calculate_peptide_mass(peptide)
             hydrophobicity = predict_hydrophobicity(peptide)
@@ -148,15 +157,24 @@ def write_csv(output_file, data):
         writer.writeheader()
         writer.writerows(data)
 
+# Add this to the main function to set up logging
 def main():
     parser = argparse.ArgumentParser(description="Glycopeptide Finder")
     parser.add_argument("-i", "--input", required=True, help="Input FASTA file")
     parser.add_argument("-o", "--output", help="Output CSV file prefix")
     parser.add_argument("-p", "--protease", default="trypsin", help="Protease to use for cleavage ('all' for all proteases)")
     parser.add_argument("-c", "--missed_cleavages", type=int, default=0, help="Number of missed cleavages allowed")
+    parser.add_argument("-l", "--log", help="Provide log file name (suggestion: log.txt)")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output")
 
+    # Parse arguments
     args = parser.parse_args()
 
+    # Set up logging if log file is provided
+    if args.log:
+        setup_logging(args.log)
+
+    # Process the input file
     input_file = args.input
     base_filename = input_file.rsplit(".", 1)[0]
     missed_cleavages = args.missed_cleavages
@@ -167,7 +185,8 @@ def main():
     elif args.protease.lower() in proteases:
         selected_proteases = [args.protease.lower()]
     else:
-        print(f"Protease {args.protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
+        if args.log:
+            logging.error(f"Protease {args.protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
         return
 
     # Ensure the output directory exists
@@ -181,7 +200,12 @@ def main():
         output_file = args.output or f"{output_dir}/{base_filename}_predicted_{protease}_glycopeptides.csv"
         results = process_fasta(input_file, protease, missed_cleavages)
         write_csv(output_file, results)
-        print(f"Results for {protease} written to {output_file}")
+        if args.log:
+            logging.info(f"Results for {protease} written to {output_file}. Processing complete.")
+        if args.verbose:
+            print(f"Results for {protease} written to {output_file}. Processing complete.")
 
+
+# main()
 if __name__ == "__main__":
     main()
