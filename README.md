@@ -6,6 +6,46 @@
 
 Glycopeptide Sequence Finder is a Python script that processes protein sequences from a FASTA file to find amino acid sequences which may or may not contain the post-translational modification glycosylation, the attachment of glycans (polysaccharides) to protein sequences. It uses user-specified proteases to digest and cleave protein sequences into amino acid sequences. The script then identifies N-linked glycopeptides using glycosylation sequon (motifs) like the N-sequon “N[^P][STC]” (NX[STC], where X is not P). It calculates the properties of these glycopeptides, including mass, hydrophobicity, and glycosylation sites. Additionally, the script gathers information from the inputted FASTA file to create a predicted digested glycopeptide (peptide sequence backbone) library. The output is written to a CSV file, making it easy to integrate into downstream analyses.
 
+Here is a table of contents for your README file:
+
+# Table of Contents
+1. [Overview](#overview)
+2. [Features](#features)
+    - [Protease-Specific Cleavage](#protease-specific-cleavage)
+    - [Missed Cleavages](#missed-cleavages)
+    - [Glycosylation Type](#glycosylation-type)
+    - [Peptide Property Calculation](#peptide-property-calculation)
+3. [Requirements](#requirements)
+4. [Installation](#installation)
+5. [Usage](#usage)
+    - [Command-Line Arguments](#arguments)
+    - [Example Usage](#example)
+    - [Example CSV Output](#example-csv-content)
+6. [Protease Rules](#protease-rules)
+7. [Glycosylation Type Rules](#glycosylation-type-rules)
+
+### Additional Features
+
+8. [Create Glycan Mass Library](#create-glycan-mass-library)
+    - [Input File Format](#input-file-format)
+    - [Output File Format](#output-file-format)
+9. [Calculate Predicted Intact Glycopeptide Library](#calculate-predicted-intact-glycopeptide-library)
+    - [Input and Output Formats](#input-and-output-formats)
+    - [Example Command and Arguments](#example)
+10. [Batch Processing Scripts](#batch-processing-scripts)
+    - [Batch Run for FASTA Processing](#batch-run)
+    - [Batch Run for Glycopeptide Library Calculation](#batch-run)
+11. [Merging CSV Files](#merging-csv-files)
+
+### Reference Materials
+
+12. [License](#license)
+13. [Acknowledgments](#acknowledgments)
+14. [Appendix](#appendix)
+    - [Log File Details](#log-file)
+    - [Test Proteomes List](#test-proteomes)
+    - [Glycan Mass Library](#glycan-mass-library)
+
 ## Features
 
 1. **Protease-Specific Cleavage:**
@@ -117,7 +157,9 @@ The following glycosylation types sequons (motifs) are supported:
 | O-linked           | [ST]           |
 | C-linked           | W..[WCF]       |
 
-## Create Glycan Mass Library (create_glycan_library.py)
+## Create Glycan Mass Library 
+
+create_glycan_library.py
 
 This script processes glycan data from a CSV file and splits it into columns based on specific formatting rules.
 
@@ -175,7 +217,9 @@ G00017IP,HexNAc(4)Hex(3)Sulpho(1) % 1396.44334021,G67486RJ,HexNAc(4)Hex(3)Sulpho
 G00024MO,Hex(3) % 504.1690352,G39365VM,Hex(3),504.1690352
 ```
 
-## Calculate Predicted Intact (Peptide+Glycan mass) Glycopeptide Library (compute_intact_glycopeptide_library.py)
+## Calculate Predicted Intact Glycopeptide Library 
+
+(Peptide+Glycan mass) Glycopeptide Library (compute_intact_glycopeptide_library.py)
 
 This script computes the intact glycopeptide mass by combining a peptide library with a glycan library. It calculates m/z values for charge states ranging from 2 to a user-defined maximum (default: 6).
 
@@ -238,7 +282,13 @@ sp|A0A1B0GTW7|CIROP_HUMAN,333,G41247ZX,HexNAc(2)Hex(6),1378.475686,ENCSTR,332,33
 sp|A0A1B0GTW7|CIROP_HUMAN,425,G62765YT,HexNAc(2)Hex(8),1702.581333,DSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDK,418,472,54,NHSA,5720.534757730061,7423.116090730061,-0.22,4.56,trypsin,N,0,Homo sapiens,9606,CIROP,1,1,3712.5653213650303,2475.3793062433538,1856.7862986825153,1485.630494146012,1238.1932911216768
 ```
 
-## Batch Run (batch_glycopeptide_sequence_finder.sh)
+# Batch Processing Scripts
+
+Shell scripts for batch processing.
+
+## Batch Run for FASTA Processing
+
+batch_glycopeptide_sequence_finder.sh
 
 To process multiple FASTA files in parallel using all proteases, run the following command:
 
@@ -261,7 +311,9 @@ Parameters can be adjusted in the shell script.
 
 This command allows you to efficiently process multiple FASTA files in parallel, reducing the overall processing time.
 
-## Batch Run (batch_compute_intact_glycopeptide_library.sh)
+## Batch Run for Glycopeptide Library Calculation
+
+batch_compute_intact_glycopeptide_library.sh
 
 To process multiple digested glycopeptide libraries in parallel, run the following command:
 
