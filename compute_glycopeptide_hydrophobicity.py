@@ -79,8 +79,11 @@ def main():
     # Calculate hydrophobicity scores
     glycopeptide_hf_values, glycopeptide_weighted_hf_values = calculate_scores(glycopeptide_data, glycan_hf_dict)
     
-    # Determine output file name
-    output_file = args.output_file if args.output_file else f"{os.path.splitext(args.glycopeptide_file)[0]}_HF.csv"
+    # Determine output file name and ensure it is saved in the HF_glycopeptide_library directory
+    output_dir = os.path.join(os.path.dirname(__file__), 'HF_glycopeptide_library')
+    os.makedirs(output_dir, exist_ok=True)
+    output_file_name = args.output_file if args.output_file else f"{os.path.splitext(os.path.basename(args.glycopeptide_file))[0]}_HF.csv"
+    output_file = os.path.join(output_dir, output_file_name)
     
     # Save the results to a CSV file
     save_results(glycopeptide_data, glycopeptide_hf_values, glycopeptide_weighted_hf_values, output_file)
