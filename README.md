@@ -32,16 +32,18 @@ Here is a table of contents for your README file:
 9. [Calculate Predicted Intact Glycopeptide Library](#calculate-predicted-intact-glycopeptide-library)
     - [Input and Output Formats](#input-and-output-formats)
     - [Example Command and Arguments](#example)
-10. [Batch Processing Scripts](#batch-processing-scripts)
+10. [Glycan Hydrophobicity Ranking](#glycan-hydrophobicity-ranking)
+10. [Glycopeptide Hydrophobicity Calculation](#glycopeptide-hydrophobicity-calculation)
+11. [Batch Processing Scripts](#batch-processing-scripts)
     - [Batch Run for FASTA Processing](#batch-run)
     - [Batch Run for Glycopeptide Library Calculation](#batch-run)
-11. [Merging CSV Files](#merging-csv-files)
+12. [Merging CSV Files](#merging-csv-files)
 
 ### Reference Materials
 
-12. [License](#license)
-13. [Acknowledgments](#acknowledgments)
-14. [Appendix](#appendix)
+13. [License](#license)
+14. [Acknowledgments](#acknowledgments)
+15. [Appendix](#appendix)
     - [Log File Details](#log-file)
     - [Test Proteomes List](#test-proteomes)
     - [Glycan Mass Library](#glycan-mass-library)
@@ -282,6 +284,47 @@ sp|A0A1B0GTW7|CIROP_HUMAN,333,G41247ZX,HexNAc(2)Hex(6),1378.475686,ENCSTR,332,33
 sp|A0A1B0GTW7|CIROP_HUMAN,425,G62765YT,HexNAc(2)Hex(8),1702.581333,DSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDK,418,472,54,NHSA,5720.534757730061,7423.116090730061,-0.22,4.56,trypsin,N,0,Homo sapiens,9606,CIROP,1,1,3712.5653213650303,2475.3793062433538,1856.7862986825153,1485.630494146012,1238.1932911216768
 ```
 
+## Glycan Hydrophobicity Ranking
+
+This script ranks glycans based on their adjusted hydrophobicity factor (HF). The analysis removes the peptide effect, computes a weighted HF score considering glycan frequency, and normalizes the adjusted HF values using Z-scores. The glycans are then ranked by their weighted adjusted HF. Note, more glycopeptide data is needed for this to hold any value, work in progress.
+
+### Functions:
+
+- `compute_adjusted_hf(df)`: Adjusts HF by removing the peptide effect.
+- `compute_weighted_adjusted_hf(df)`: Normalizes the adjusted HF and computes a weighted HF based on glycan frequency.
+- `count_glycan_frequency(df)`: Counts the frequency of each glycan in the dataset.
+- `rank_glycans_by_hydrophobicity(input_csv, output_csv)`: Main function that processes the input CSV, computes the adjusted HF, and outputs the glycan ranking by hydrophobicity.
+
+```sh
+python script.py -i input_file.csv -o output_file.csv
+```
+
+Arguments:
+- `-i`, `--input`: Input CSV file path (required).
+- `-o`, `--output`: Output CSV file path (optional, defaults to `<input_file>_glycan_hydrophobicity_index.csv`).
+
+The output CSV will contain glycans ranked by their weighted adjusted HF score.
+
+## Glycopeptide Hydrophobicity Calculation
+
+This script calculates hydrophobicity scores for glycopeptides based on peptide hydrophobicity and glycan composition. It takes as input a glycopeptide data file and a glycan hydrophobicity data file, then outputs the results to a CSV file. Note, more glycopeptide data is needed for this to hold any value, work in progress.
+
+Usage
+
+```sh
+python script.py -i <glycopeptide_file> -gh <glycan_hf_file> -o <output_file>
+```
+
+Arguments:
+- `-i`: Input file containing glycopeptide data (CSV).
+- `-gh`: Input file containing glycan hydrophobicity data (CSV, optional if default is used).
+- `-o`: Output file name (optional, defaults to `<input_file_name>_HF.csv`).
+
+Workflow
+	1.	Load glycopeptide and glycan hydrophobicity data.
+	2.	Calculate hydrophobicity scores for each glycopeptide.
+	3.	Save the results to a CSV file.
+
 # Batch Processing Scripts
 
 Shell scripts for batch processing.
@@ -361,6 +404,10 @@ Chauhan, Jagat Singh, Alka Rao, and Gajendra P. S. Raghava. “In Silico Platfor
 - Large-Scale Identification of N-Linked Intact Glycopeptides in Human Serum Using HILIC Enrichment and Spectral Library Search.
 
 Shu, Qingbo, Mengjie Li, Lian Shu, Zhiwu An, Jifeng Wang, Hao Lv, Ming Yang, et al. “Large-Scale Identification of N-Linked Intact Glycopeptides in Human Serum Using HILIC Enrichment and Spectral Library Search.” Molecular & Cellular Proteomics : MCP 19, no. 4 (April 2020): 672–89. https://doi.org/10.1074/mcp.RA119.001791.
+
+- Assessing the Hydrophobicity of Glycopeptides Using Reversed-Phase Liquid Chromatography and Tandem Mass Spectrometry.
+
+Wang, Junyao, Aiying Yu, Byeong Gwan Cho, and Yehia Mechref. “Assessing the Hydrophobicity of Glycopeptides Using Reversed-Phase Liquid Chromatography and Tandem Mass Spectrometry.” Journal of Chromatography. A 1706 (September 13, 2023): 464237. https://doi.org/10.1016/j.chroma.2023.464237.
 
 - BioPython for handling FASTA files.
 
