@@ -1,5 +1,5 @@
 """
-glycopeptide_finder_cmd.py
+glycopeptide_sequence_finder_cmd.py
 
 This script processes a FASTA file to identify glycopeptides based on protease cleavage rules and glycosylation sequons, 
 predicts their masses, calculates their hydrophobicity, and calculates their pI. The results are written to a CSV file.
@@ -20,17 +20,26 @@ Functions:
     calculate_pI(peptide_sequence):
         Calculates the isoelectric point (pI) of a peptide sequence.
     
-    process_fasta(file, protease, missed_cleavages):
+    process_fasta(file, protease, missed_cleavages, glycosylation_type):
         Processes the input FASTA file and extracts glycopeptides.
     
     write_csv(output_file, data):
         Writes results to a CSV file.
     
+    compute_mz(mass, charge):
+        Compute m/z value for a given mass and charge state.
+
+    process_glycopeptides(peptide_file, glycan_file, max_charge):
+        Generate glycopeptides and compute m/z values.
+    
+    setup_logging(log_file):
+        Sets up logging to a file.
+    
     main():
         Main function to parse arguments and execute the glycopeptide finding process.
 
 Usage:
-    python glycopeptide_finder_cmd.py -i <input_fasta_file> -o <output_csv_file> -p <protease> -g <glycosylation_type> -c <missed_cleavages> -l <log_file> -v
+    python test_glycopeptide_sequence_finder_cmd.py -i <input_fasta_file> -o <output_csv_file> -p <protease> -g <glycosylation_type> -c <missed_cleavages> -l <log_file> -v -y <glycan_file> -z <max_charge>
 
 Author:
     Richard Shipman -- 2025
@@ -43,6 +52,7 @@ from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 from pyteomics.mass import calculate_mass
 import os
 import logging
+import pandas as pd
 
 # Define protease cleavage rules
 proteases = {
@@ -56,11 +66,35 @@ proteases = {
     "proteinase-k": ("[AFILVWY]", None),  # Cleaves after A, F, I, L, V, W, Y
 }
 
-# Define glycosylation rules
+# Define glycosylation sequon rules
 glycosylation = {
     "N": ("N[^P][STC]"),  # N-glycosylation sequon - N-X-S/T/C (X is any amino acid except P).
     "O": ("[ST]"),  # O-glycosylation sequon - S/T  (experimental! Creates large number of O-glycopeptides.)
     "C": ("W..[WCF]")  # C-glycosylation sequon - W-X-X-W, W-X-X-C, or W-X-X-F (X is any amino acid).
+}
+
+# Define default glycan mass library as a DataFrame
+default_glycan_library = pd.DataFrame([
+    #{"glytoucan_ac": "G59324HL", "byonic": "HexNAc(2)Hex(12) % 2350.792627", "composition": "HexNAc(2)Hex(12)", "mass": 2350.792627}, # N2H12
+    #{"glytoucan_ac": "G58087IP", "byonic": "HexNAc(2)Hex(11) % 2188.739804", "composition": "HexNAc(2)Hex(11)", "mass": 2188.739804}, # N2H11
+    #{"glytoucan_ac": "G83460ZZ", "byonic": "HexNAc(2)Hex(10) % 2026.686980", "composition": "HexNAc(2)Hex(10)", "mass": 2026.686980}, # N2H10
+    {"glytoucan_ac": "G80920RR", "byonic": "HexNAc(2)Hex(9) % 1864.634157", "composition": "HexNAc(2)Hex(9)", "mass": 1864.634157}, # N2H9
+    {"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333}, # N2H8
+    {"glytoucan_ac": "G31852PQ", "byonic": "HexNAc(2)Hex(7) % 1540.528510", "composition": "HexNAc(2)Hex(7)", "mass": 1540.528510}, # N2H7
+    {"glytoucan_ac": "G41247ZX", "byonic": "HexNAc(2)Hex(6) % 1378.475686", "composition": "HexNAc(2)Hex(6)", "mass": 1378.475686}, # N2H6
+])
+
+# Define monosaccharide mass library with multiple properties (later use)
+monosaccharide_library = {
+    "Hex": {"mass": 162.0528, "formula": "C6H10O5"},
+    "HexNAc": {"mass": 203.0794, "formula": "C8H13NO5"},
+    "Fuc": {"mass": 146.0579, "formula": "C6H12O5"},
+    "NeuAc": {"mass": 291.0954, "formula": "C11H17NO8"},
+    "NeuGc": {"mass": 307.0903, "formula": "C11H17NO9"},
+    "Pent": {"mass": 132.0423, "formula": "C5H10O5"},
+    "Sulpho": {"mass": 79.9568, "formula": "SO3"},
+    "Phospho": {"mass": 79.9663, "formula": "PO3"},
+    "dHex": {"mass": 146.0579, "formula": "C6H12O5"}
 }
 
 def cleave_sequence(sequence, protease, missed_cleavages=0):
@@ -104,12 +138,15 @@ def calculate_peptide_mass(sequence):
 
 def predict_hydrophobicity(peptide_sequence):
     """Predicts the hydrophobicity of a peptide sequence using the Kyte-Doolittle scale."""
+    
+    # Kyte-Doolittle hydrophobicity values for amino acids
     hydrophobicity_values = {
         'A': 1.8, 'R': -4.5, 'N': -3.5, 'D': -3.5, 'C': 2.5,
         'Q': -3.5, 'E': -3.5, 'G': -0.4, 'H': -3.2, 'I': 4.5,
         'L': 3.8, 'K': -3.9, 'M': 1.9, 'F': 2.8, 'P': -1.6,
         'S': -0.8, 'T': -0.7, 'W': -0.9, 'Y': -1.3, 'V': 4.2
     }
+
     # Calculate the average hydrophobicity of the peptide
     total_hydrophobicity = sum(hydrophobicity_values.get(aa, 0) for aa in peptide_sequence)
     average_hydrophobicity = round(total_hydrophobicity / len(peptide_sequence), 2)
@@ -120,6 +157,59 @@ def calculate_pI(peptide_sequence):
     """Calculates the isoelectric point (pI) of a peptide sequence."""
     pI_calculator = IsoelectricPoint(peptide_sequence)
     return round(pI_calculator.pi(), 2)
+
+def compute_mz(mass, charge):
+    """Compute m/z value for a given mass and charge state."""
+    proton_mass = 1.007276
+    return (mass + (charge * proton_mass)) / charge
+
+def process_glycopeptides(peptide_file, glycans, max_charge):
+    """Generate glycopeptides and compute m/z values."""
+    # Load peptide and glycan data
+    peptides = pd.read_csv(peptide_file, low_memory=False)
+    
+    # Convert relevant columns to float
+    peptides = peptides[pd.to_numeric(peptides['PredictedMass'], errors='coerce').notnull()]
+    peptides['PredictedMass'] = peptides['PredictedMass'].astype(float)
+    glycans['mass'] = glycans['mass'].astype(float)
+    
+    results = []
+    
+    # Generate glycopeptides and compute m/z values
+    for _, pep in peptides.iterrows():
+        for _, gly in glycans.iterrows():
+            glycopeptide_mass = pep['PredictedMass'] + gly['mass']
+            mz_values = {f'z{z}': compute_mz(glycopeptide_mass, z) for z in range(2, max_charge + 1)}
+            
+            # Create a dictionary with the results
+            result = {
+                'ProteinID': pep['ProteinID'],
+                'Site': pep['Site'],
+                'glytoucan_ac': gly['glytoucan_ac'],
+                'composition': gly['composition'],
+                'Peptide': pep['Peptide'],
+                'Start': pep['Start'],
+                'End': pep['End'],
+                'Length': pep['Length'],
+                'Sequon': pep['Sequon'],
+                'GlycopeptideMass': glycopeptide_mass,
+                'PeptideMass': pep['PredictedMass'],
+                'glycan_mass': gly['mass'],
+                'Hydrophobicity': pep['Hydrophobicity'],
+                'pI': pep['pI'],
+                'Protease': pep['Protease'],
+                'GlycosylationType': pep['GlycosylationType'],
+                'MissedCleavages': pep['MissedCleavages'],
+                'Species': pep['Species'],
+                'TaxonID': pep['TaxonID'],
+                'GeneName': pep['GeneName'],
+                'ProteinEvidence': pep['ProteinEvidence'],
+                'SequenceVersion': pep['SequenceVersion'],
+                **mz_values
+            }
+            results.append(result)
+    
+    return pd.DataFrame(results)
 
 def setup_logging(log_file):
     """Sets up logging to a file."""
@@ -133,6 +223,7 @@ def process_fasta(file, protease, missed_cleavages, glycosylation_type):
     # Regular expression to capture OS and OX from the header
     os_ox_pattern = r"OS=([^\s]+(?: [^\s]+)*)\s+OX=(\d+)\s+GN=([^\s]+)\s+PE=(\d+)\s+SV=(\d+)"
 
+    # Process each record in the FASTA file
     for record in SeqIO.parse(file, "fasta"):
         protein_id = record.id
         sequence = str(record.seq)
@@ -148,17 +239,23 @@ def process_fasta(file, protease, missed_cleavages, glycosylation_type):
             pe_value = match.group(4)  # Protein Evidence
             sv_value = match.group(5)  # Sequence Version
         else:
-            os_value = "Unknown"
-            ox_value = "Unknown"
-            gn_value = "Unknown"
-            pe_value = "Unknown"
-            sv_value = "Unknown"
+            # blank values if not found
+            os_value = ""
+            ox_value = ""
+            gn_value = ""
+            pe_value = ""
+            sv_value = ""
 
+        # Log the digestion processing of the protein with protease and missed cleavages
         logging.info(f"Processing {protein_id} with {len(sequence)} amino acids.")        
         peptides = cleave_sequence(sequence, protease, missed_cleavages)
         logging.info(f"Found {len(peptides)} peptides after {protease} cleavage. The peptides were: {peptides}")
+        
+        # Find glycopeptides
         x_glycopeptides = find_glycopeptides(peptides, sequence, glycosylation_type)
         logging.info(f"Found {len(x_glycopeptides)} {glycosylation_type}-glycopeptides. The glycopeptides were: {x_glycopeptides}")
+        
+        # Process each glycopeptide
         for peptide, site in x_glycopeptides:
             mass = calculate_peptide_mass(peptide)
             hydrophobicity = predict_hydrophobicity(peptide)
@@ -204,8 +301,10 @@ def main():
     parser.add_argument("-o", "--output", help="Output CSV file prefix. Default output directory for files is 'digested_glycopeptide_library'.")
     parser.add_argument("-p", "--protease", default="trypsin", help="Protease to use for cleavage ('all' for all proteases). Default is trypsin. Proteases: trypsin, chymotrypsin, glu-c, lys-c, arg-c, pepsin, asp-n, proteinase-k.")
     parser.add_argument("-c", "--missed_cleavages", type=int, default=0, help="Number of missed cleavages allowed. Default is 0.")
+    parser.add_argument("-y", "--glycan", default=None, help="Path to glycan file (CSV). Default is 'default_glycan_library.csv'.")
     parser.add_argument("-l", "--log", help="Provide log file name. (suggestion: -l log.txt)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output.")
+    parser.add_argument("-z", "--charge", type=int, default=5, help="Maximum charge state (default: 5).")
 
     # Parse arguments
     args = parser.parse_args()
@@ -219,6 +318,23 @@ def main():
     base_filename = input_file.rsplit(".", 1)[0]
     missed_cleavages = args.missed_cleavages
     glycosylation_type = args.glycosylation
+    charge_state = args.charge
+    glycan_library = args.glycan
+
+    if glycan_library is None:
+        glycans = default_glycan_library
+    else:
+        glycans = pd.read_csv(glycan_library)
+
+    # Ensure the output directory exists
+    output_dir = "digested_glycopeptide_library"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Extract the base filename without any directory path
+    base_filename = os.path.basename(base_filename)
+
+    # Process the input file with the selected protease(s)
+    all_results = []
 
     # If "all" is selected, process all proteases
     if args.protease.lower() == "all":
@@ -230,23 +346,56 @@ def main():
             logging.error(f"Protease {args.protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
         return
 
-    # Ensure the output directory exists
-    output_dir = "digested_glycopeptide_library"
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Extract the base filename without any directory path
-    base_filename = os.path.basename(base_filename)
-
+    # Process the input file with the selected protease(s)
     for protease in selected_proteases:
-        output_file = args.output or f"{output_dir}/{base_filename}_predicted_{protease}_mc_{missed_cleavages}_{glycosylation_type}-glycopeptides.csv"
-        results = process_fasta(input_file, protease, missed_cleavages, glycosylation_type)
-        write_csv(output_file, results)
+        
+        # Log the start of the process
+        print(f"Processing {input_file} with protease {protease} and {missed_cleavages} missed cleavages...")
         if args.log:
-            logging.info(f"Results for {protease} written to {output_file}. Processing complete.")
+            logging.info(f"Processing {input_file} with protease {protease} and {missed_cleavages} missed cleavages...")
+        
+        # Process the input file
+        results = process_fasta(input_file, protease, missed_cleavages, glycosylation_type)
+        
+        # Log the completion of the process
+        all_results.extend(results)
         if args.verbose:
-            print(f"Results for {protease} written to {output_file}. Processing complete.")
+            print(f"Processed {len(results)} peptides for protease {protease}.")
+        
+        # Write the results to a new CSV file
+        output_file = args.output or f"{output_dir}/{base_filename}_{protease}_digested_mc{missed_cleavages}_z{charge_state}_{glycosylation_type}-glycopeptides.csv"
+        write_csv(output_file, all_results)
+        #print(f"Results written to {output_file}. Processing complete.")
 
+        # Log the completion of the process
+        if args.log:
+            logging.info(f"Results written to {output_file}. Processing complete.")
+        if args.verbose:
+            print(f"Results written to {output_file}. Processing complete.")
 
-# main()
+        # Set the output file for glycopeptides
+        glycopeptide_output_file = output_file
+        #print(f"Generating glycopeptides and computing m/z values...")
+
+        # Log the start of the glycopeptide processing
+        if args.log:
+            logging.info(f"Generating glycopeptides and computing m/z values with range of +2 to +{args.charge} charge states using {args.glycan} glycan library.")
+        if args.verbose:
+            print(f"Generating glycopeptides and computing m/z values with range of +2 to +{args.charge} charge states using {args.glycan} glycan library.")
+
+        # Process glycopeptides and compute m/z values
+        glycopeptide_results = process_glycopeptides(output_file, glycans, charge_state)
+
+        # Write the results to a new CSV file
+        glycopeptide_results.to_csv(glycopeptide_output_file, index=False)
+        #print(f"Glycopeptide results written to {glycopeptide_output_file}. Processing complete.")
+
+        # Log the completion of the glycopeptide processing
+        if args.log:
+            logging.info(f"Glycopeptide results written to {glycopeptide_output_file}. Processing complete.")
+        if args.verbose:
+            print(f"Glycopeptide results written to {glycopeptide_output_file}. Processing complete.")
+
+# main function
 if __name__ == "__main__":
     main()

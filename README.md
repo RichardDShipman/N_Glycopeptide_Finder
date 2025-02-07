@@ -29,21 +29,19 @@ Here is a table of contents for your README file:
 8. [Create Glycan Mass Library](#create-glycan-mass-library)
     - [Input File Format](#input-file-format)
     - [Output File Format](#output-file-format)
-9. [Calculate Predicted Intact Glycopeptide Library](#calculate-predicted-intact-glycopeptide-library)
-    - [Input and Output Formats](#input-and-output-formats)
-    - [Example Command and Arguments](#example)
-10. [Glycan Hydrophobicity Ranking](#glycan-hydrophobicity-ranking)
+9. [Glycan Hydrophobicity Ranking](#glycan-hydrophobicity-ranking)
 10. [Glycopeptide Hydrophobicity Calculation](#glycopeptide-hydrophobicity-calculation)
 11. [Batch Processing Scripts](#batch-processing-scripts)
     - [Batch Run for FASTA Processing](#batch-run)
     - [Batch Run for Glycopeptide Library Calculation](#batch-run)
-12. [Merging CSV Files](#merging-csv-files)
+12. [Dockerfile](#dockerfile)
+13. [Merging CSV Files](#merging-csv-files)
 
 ### Reference Materials
 
-13. [License](#license)
-14. [Acknowledgments](#acknowledgments)
-15. [Appendix](#appendix)
+14. [License](#license)
+15. [Acknowledgments](#acknowledgments)
+16. [Appendix](#appendix)
     - [Log File Details](#log-file)
     - [Test Proteomes List](#test-proteomes)
     - [Glycan Mass Library](#glycan-mass-library)
@@ -106,11 +104,13 @@ python glycopeptide_finder_cmd.py -i <input_fasta> [-o <output_csv>] [-p <protea
 - `-c`, `--missed_cleavages` (optional): Number of missed cleavages allowed. Default is 0.
 - `-l log.txt`, `--log log.txt` (optional): Path to the log file. If omitted, logging is disabled.
 - `-v`, `--verbose` (optional): Enable verbose output. Default is False.
+- `-y`, `--glycan`: Path to the glycan file (CSV format) (Default, 4 glycans stored in file). 
+- `-z`, `--charge`: (Optional) Maximum charge state to compute (default: 5).
 
 ### Example
 
 ```sh
-python glycopeptide_finder_cmd.py -i test_proteomes/human_uniprotkb_proteome_UP000005640_AND_revi_2025_01_17.fasta -p trypsin -g N -c 0
+python glycopeptide_finder_cmd.py -i test_proteomes/human_uniprotkb_proteome_UP000005640_AND_revi_2025_01_17.fasta -p trypsin -g N -c 0 -z 3
 ```
 
 The output file will be named:
@@ -120,17 +120,18 @@ The output file will be named:
 ### Example CSV Content
 
 ```CSV
-ProteinID,Site,Peptide,Start,End,Length,Sequon,PredictedMass,Hydrophobicity,pI,Protease,GlycosylationType,MissedCleavages,Species,TaxonID,GeneName,ProteinEvidence,SequenceVersion
-sp|A0A087X1C5|CP2D7_HUMAN,416,GTTLITNLSSVLK,410,423,13,NLSS,1345.78168089469,0.66,8.75,trypsin,N,0,Homo sapiens,9606,CYP2D7,5,1
-sp|A0A0K2S4Q6|CD3CH_HUMAN,100,SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,3085.50915394004,-0.23,4.05,trypsin,N,0,Homo sapiens,9606,CD300H,1,1
-sp|A0A1B0GTW7|CIROP_HUMAN,333,ENCSTR,332,338,6,NCST,708.2860878938,-1.75,6.09,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
-sp|A0A1B0GTW7|CIROP_HUMAN,425,DSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDK,418,472,54,NHSA,5720.534757730061,-0.22,4.56,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
-sp|A0A1B0GTW7|CIROP_HUMAN,491,MYKPLANGSECWK,485,498,13,NGSE,1525.70575615645,-0.75,7.93,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
-sp|A0A1B0GTW7|CIROP_HUMAN,524,CFFANLTSQLLPGDKPR,520,537,17,NLTS,1905.9771033092898,-0.16,8.22,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
-sp|A0A1B0GTW7|CIROP_HUMAN,713,KPLEVYHGGANFTTQPSK,703,721,18,NFTT,1973.00067520484,-0.91,8.51,trypsin,N,0,Homo sapiens,9606,CIROP,1,1
-sp|A0AV02|S12A8_HUMAN,221,LQLLLLFLLAVSTLDFVVGSFTHLDPEHGFIGYSPELLQNNTLPDYSPGESFFTVFGVFFPAATGVMAGFNMGGDLR,182,259,77,NNTL,8353.194115527771,0.56,4.14,trypsin,N,0,Homo sapiens,9606,SLC12A8,1,4
-sp|A0AV02|S12A8_HUMAN,561,SEGTQPEGTYGEQLVPELCNQSESSGEDFFLK,542,574,32,NQSE,3504.5514893278296,-0.92,4.05,trypsin,N,0,Homo sapiens,9606,SLC12A8,1,4
-sp|A0AV02|S12A8_HUMAN,645,ASPGLHLGSASNFSFFR,634,651,17,NFSF,1793.88491717661,0.16,9.8,trypsin,N,0,Homo sapiens,9606,SLC12A8,1,4
+ProteinID,Site,glytoucan_ac,composition,Peptide,Start,End,Length,Sequon,GlycopeptideMass,PeptideMass,glycan_mass,Hydrophobicity,pI,Protease,GlycosylationType,MissedCleavages,Species,TaxonID,GeneName,ProteinEvidence,SequenceVersion,z2,z3
+sp|A0A087X1C5|CP2D7_HUMAN,416,G80920RR,HexNAc(2)Hex(9),GTTLITNLSSVLK,410,423,13,NLSS,3210.41583789469,1345.78168089469,1864.634157,0.66,8.75,trypsin,N,0,Homo sapiens,9606.0,CYP2D7,5.0,1.0,1606.215194947345,1071.1458886315634
+sp|A0A087X1C5|CP2D7_HUMAN,416,G62765YT,HexNAc(2)Hex(8),GTTLITNLSSVLK,410,423,13,NLSS,3048.36301389469,1345.78168089469,1702.581333,0.66,8.75,trypsin,N,0,Homo sapiens,9606.0,CYP2D7,5.0,1.0,1525.188782947345,1017.1282806315634
+sp|A0A087X1C5|CP2D7_HUMAN,416,G31852PQ,HexNAc(2)Hex(7),GTTLITNLSSVLK,410,423,13,NLSS,2886.31019089469,1345.78168089469,1540.52851,0.66,8.75,trypsin,N,0,Homo sapiens,9606.0,CYP2D7,5.0,1.0,1444.162371447345,963.1106729648967
+sp|A0A087X1C5|CP2D7_HUMAN,416,G41247ZX,HexNAc(2)Hex(6),GTTLITNLSSVLK,410,423,13,NLSS,2724.2573668946898,1345.78168089469,1378.475686,0.66,8.75,trypsin,N,0,Homo sapiens,9606.0,CYP2D7,5.0,1.0,1363.135959447345,909.0930649648966
+sp|A0A0K2S4Q6|CD3CH_HUMAN,100,G80920RR,HexNAc(2)Hex(9),SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,4950.1433109400405,3085.50915394004,1864.634157,-0.23,4.05,trypsin,N,0,Homo sapiens,9606.0,CD300H,1.0,1.0,2476.07893147002,1651.0550463133468
+sp|A0A0K2S4Q6|CD3CH_HUMAN,100,G62765YT,HexNAc(2)Hex(8),SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,4788.09048694004,3085.50915394004,1702.581333,-0.23,4.05,trypsin,N,0,Homo sapiens,9606.0,CD300H,1.0,1.0,2395.05251947002,1597.0374383133467
+sp|A0A0K2S4Q6|CD3CH_HUMAN,100,G31852PQ,HexNAc(2)Hex(7),SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,4626.03766394004,3085.50915394004,1540.52851,-0.23,4.05,trypsin,N,0,Homo sapiens,9606.0,CD300H,1.0,1.0,2314.02610797002,1543.01983064668
+sp|A0A0K2S4Q6|CD3CH_HUMAN,100,G41247ZX,HexNAc(2)Hex(6),SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,4463.98483994004,3085.50915394004,1378.475686,-0.23,4.05,trypsin,N,0,Homo sapiens,9606.0,CD300H,1.0,1.0,2232.9996959700197,1489.00222264668
+sp|A0A1B0GTW7|CIROP_HUMAN,333,G80920RR,HexNAc(2)Hex(9),ENCSTR,332,338,6,NCST,2572.9202448938,708.2860878938,1864.634157,-1.75,6.09,trypsin,N,0,Homo sapiens,9606.0,CIROP,1.0,1.0,1287.4673984469,858.6473576312666
+sp|A0A1B0GTW7|CIROP_HUMAN,333,G62765YT,HexNAc(2)Hex(8),ENCSTR,332,338,6,NCST,2410.8674208938,708.2860878938,1702.581333,-1.75,6.09,trypsin,N,0,Homo sapiens,9606.0,CIROP,1.0,1.0,1206.4409864469,804.6297496312667
+
 ```
 
 ## Protease Rules
@@ -158,6 +159,40 @@ The following glycosylation types sequons (motifs) are supported:
 | N-linked           | N[^P][STC]     |
 | O-linked           | [ST]           |
 | C-linked           | W..[WCF]       |
+
+## Glycan Library
+
+The default glycan mass library is defined as a DataFrame containing a set of glycans with their respective compositions and masses. This library is used to calculate the properties of glycopeptides. Alter if you wish to change the glycan mass library in the script
+
+```python
+import pandas as pd
+
+default_glycan_library = pd.DataFrame([
+    {"glytoucan_ac": "G80920RR", "byonic": "HexNAc(2)Hex(9) % 1864.634157", "composition": "HexNAc(2)Hex(9)", "mass": 1864.634157}, # N2H9
+    {"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333}, # N2H8
+    {"glytoucan_ac": "G31852PQ", "byonic": "HexNAc(2)Hex(7) % 1540.528510", "composition": "HexNAc(2)Hex(7)", "mass": 1540.528510}, # N2H7
+    {"glytoucan_ac": "G41247ZX", "byonic": "HexNAc(2)Hex(6) % 1378.475686", "composition": "HexNAc(2)Hex(6)", "mass": 1378.475686}, # N2H6
+])
+```
+
+This DataFrame includes the following columns:
+- `glytoucan_ac`: The glycosylation context identifier.
+- `byonic`: The peptide sequence and mass in Byonic format.
+- `composition`: The glycan composition.
+- `mass`: The mass of the glycan.
+
+The default glycan mass library can be expanded or customized as needed for specific analyses.
+
+### Example glycan mass library data
+
+This data is stored in the `glycan_mass_library` directory.
+
+```csv
+glytoucan_ac,byonic,composition,mass
+G62765YT,HexNAc(2)Hex(8) % 1702.581333,HexNAc(2)Hex(8),1702.581333
+G31852PQ,HexNAc(2)Hex(7) % 1540.528510,HexNAc(2)Hex(7),1540.528510
+G41247ZX,HexNAc(2)Hex(6) % 1378.475686,HexNAc(2)Hex(6),1378.475686
+```
 
 ## Create Glycan Mass Library 
 
@@ -217,71 +252,6 @@ G00015MO,HexNAc(1)Hex(3) % 707.248407805,G08590QR,HexNAc(1)Hex(3),707.248407805
 G00016MO,Hex(2) % 342.1162117,G90627TW,Hex(2),342.1162117
 G00017IP,HexNAc(4)Hex(3)Sulpho(1) % 1396.44334021,G67486RJ,HexNAc(4)Hex(3)Sulpho(1),1396.44334021
 G00024MO,Hex(3) % 504.1690352,G39365VM,Hex(3),504.1690352
-```
-
-## Calculate Predicted Intact Glycopeptide Library 
-
-(Peptide+Glycan mass) Glycopeptide Library (compute_intact_glycopeptide_library.py)
-
-This script computes the intact glycopeptide mass by combining a peptide library with a glycan library. It calculates m/z values for charge states ranging from 2 to a user-defined maximum (default: 6).
-
-- Reads peptide sequences and glycan compositions from CSV files.
-- Computes glycopeptide masses by adding peptide and glycan masses.
-- Calculates m/z values for multiple charge states.
-- Outputs results as a CSV file.
-
-```sh
-python script.py -i digested_glycopeptide_library/human_uniprotkb_proteome_UP000005640_AND_revi_2025_01_17_predicted_trypsin_mc_0_N-glycopeptides.csv -g lycan_mass_library/glycan_type_n_linked_byonic_glycan_library.csv -z 6
-```
-
-**Note:** It is recommended to use small, targeted glycan databases. Larger glycan databases can significantly increase the size and complexity of the resulting glycopeptide combinations, which may lead to longer processing times and higher computational resource requirements. By focusing on specific glycans of interest, you can streamline the analysis and improve the efficiency of the glycopeptide identification process.
-
-#### Arguments
-
-- `-i`, `--input`: Path to the peptide file (CSV format).
-- `-g`, `--glycan`: Path to the glycan file (CSV format).
-- `-o`, `--output`: (Optional) Output file path. Defaults to `/predicted_intact_glycopeptide_library/<input_filename>_glycopeptide_library.csv`.
-- `-z`, `--charge`: (Optional) Maximum charge state to compute (default: 6).
-
-The script follows these steps:
-
-1. Load peptide and glycan CSV files.
-2. Iterate over each peptide and glycan to compute glycopeptide mass.
-3. Calculate m/z values for charge states.
-4. Write results to a CSV file.
-
-### Example
-
-#### Input Peptide File (peptides.csv):
-
-```csv
-ProteinID,Site,Peptide,Start,End,Length,Sequon,PredictedMass,Hydrophobicity,pI,Protease,GlycosylationType,MissedCleavages,Species,TaxonID,GeneName,ProteinEvidence,SequenceVersion
-sp|A0A498KFL4|ATGSA_MALDO,163,LNHTMCDAAGLLLFLTAIAEMAR,162,185,23,NHTM,2474.248,0.94,5.32,trypsin,N,0,Malus domestica,3750,AAT1GSA,1,1
-```
-
-#### Input Glycan File (glycans.csv):
-
-```csv
-glytoucan_ac,byonic,composition,mass
-G62765YT,HexNAc(2)Hex(8) % 1702.581333,HexNAc(2)Hex(8),1702.581333
-G31852PQ,HexNAc(2)Hex(7) % 1540.528510,HexNAc(2)Hex(7),1540.528510
-G41247ZX,HexNAc(2)Hex(6) % 1378.475686,HexNAc(2)Hex(6),1378.475686
-```
-
-#### Output File (output.csv):
-
-```csv
-ProteinID,Site,glytoucan_ac,composition,glycan_mass,Peptide,Start,End,Length,Sequon,PeptideMass,GlycopeptideMass,Hydrophobicity,pI,Protease,GlycosylationType,MissedCleavages,Species,TaxonID,GeneName,ProteinEvidence,SequenceVersion,z2,z3,z4,z5,z6
-sp|A0A087X1C5|CP2D7_HUMAN,416,G62765YT,HexNAc(2)Hex(8),1702.581333,GTTLITNLSSVLK,410,423,13,NLSS,1345.78168089469,3048.36301389469,0.66,8.75,trypsin,N,0,Homo sapiens,9606,CYP2D7,5,1,1525.188782947345,1017.1282806315634,763.0980294736726,610.679878778938,509.06777831578165
-sp|A0A087X1C5|CP2D7_HUMAN,416,G31852PQ,HexNAc(2)Hex(7),1540.52851,GTTLITNLSSVLK,410,423,13,NLSS,1345.78168089469,2886.31019089469,0.66,8.75,trypsin,N,0,Homo sapiens,9606,CYP2D7,5,1,1444.162371447345,963.1106729648967,722.5848237236726,578.269314178938,482.0589744824483
-sp|A0A087X1C5|CP2D7_HUMAN,416,G41247ZX,HexNAc(2)Hex(6),1378.475686,GTTLITNLSSVLK,410,423,13,NLSS,1345.78168089469,2724.2573668946898,0.66,8.75,trypsin,N,0,Homo sapiens,9606,CYP2D7,5,1,1363.135959447345,909.0930649648966,682.0716177236725,545.858749378938,455.05017048244827
-sp|A0A0K2S4Q6|CD3CH_HUMAN,100,G62765YT,HexNAc(2)Hex(8),1702.581333,SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,3085.50915394004,4788.09048694004,-0.23,4.05,trypsin,N,0,Homo sapiens,9606,CD300H,1,1,2395.05251947002,1597.0374383133467,1198.02989773501,958.6253733880079,799.0223571566734
-sp|A0A0K2S4Q6|CD3CH_HUMAN,100,G31852PQ,HexNAc(2)Hex(7),1540.52851,SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,3085.50915394004,4626.03766394004,-0.23,4.05,trypsin,N,0,Homo sapiens,9606,CD300H,1,1,2314.02610797002,1543.01983064668,1157.51669198501,926.214808788008,772.01355332334
-sp|A0A0K2S4Q6|CD3CH_HUMAN,100,G41247ZX,HexNAc(2)Hex(6),1378.475686,SDQVIITDHPGDLTFTVTLENLTADDAGK,80,109,29,NLTA,3085.50915394004,4463.98483994004,-0.23,4.05,trypsin,N,0,Homo sapiens,9606,CD300H,1,1,2232.9996959700197,1489.00222264668,1117.00348598501,893.8042439880079,745.00474932334
-sp|A0A1B0GTW7|CIROP_HUMAN,333,G62765YT,HexNAc(2)Hex(8),1702.581333,ENCSTR,332,338,6,NCST,708.2860878938,2410.8674208938,-1.75,6.09,trypsin,N,0,Homo sapiens,9606,CIROP,1,1,1206.4409864469,804.6297496312667,603.7241312234501,483.18076017876,402.8185128156333
-sp|A0A1B0GTW7|CIROP_HUMAN,333,G31852PQ,HexNAc(2)Hex(7),1540.52851,ENCSTR,332,338,6,NCST,708.2860878938,2248.8145978938,-1.75,6.09,trypsin,N,0,Homo sapiens,9606,CIROP,1,1,1125.4145749469,750.6121419646,563.2109254734501,450.77019557876,375.8097089823
-sp|A0A1B0GTW7|CIROP_HUMAN,333,G41247ZX,HexNAc(2)Hex(6),1378.475686,ENCSTR,332,338,6,NCST,708.2860878938,2086.7617738937997,-1.75,6.09,trypsin,N,0,Homo sapiens,9606,CIROP,1,1,1044.3881629469,696.5945339645999,522.69771947345,418.35963077875994,348.8009049822999
-sp|A0A1B0GTW7|CIROP_HUMAN,425,G62765YT,HexNAc(2)Hex(8),1702.581333,DSGWYQVNHSAAEELLWGQGSGPEFGLVTTCGTGSSDFFCTGSGLGCHYLHLDK,418,472,54,NHSA,5720.534757730061,7423.116090730061,-0.22,4.56,trypsin,N,0,Homo sapiens,9606,CIROP,1,1,3712.5653213650303,2475.3793062433538,1856.7862986825153,1485.630494146012,1238.1932911216768
 ```
 
 ## Glycan Hydrophobicity Ranking
@@ -386,6 +356,66 @@ The script includes a function to merge all CSV files from a specified directory
 ```sh
 python merge_digested_glycopeptide_library.py
 ```
+
+## Dockerfile
+
+- Docker Setup for Glycopeptide Sequence Finder
+
+This section explains how to build and run the Docker container for the Glycopeptide Sequence Finder.
+
+1. Build the Docker Image
+
+To create the Docker image, run the following command in the directory containing your Dockerfile and requirements.txt:
+
+```sh
+docker build -t gsf .
+```
+
+This will:
+	•	Use the official Python 3.10-slim image.
+	•	Set /app as the working directory.
+	•	Install dependencies from requirements.txt.
+	•	Copy the glycopeptide_sequence_finder_cmd.py script into the container.
+	•	Set the entrypoint so that the script can be executed with arguments.
+
+2. Run the Docker Container
+
+To execute the script with test data, use:
+
+```sh
+docker run --rm \
+    -v "$(pwd)/test_proteomes:/app/test_proteomes" \
+    -v "$(pwd)/output:/app/digested_glycopeptide_library" \
+    gsf \
+    -i test_proteomes/apple_uniprotkb_proteome_UP000290289_AND_revi_2025_02_04.fasta \
+    -g N \
+    -o digested_glycopeptide_library/test.csv \
+    -p chymotrypsin \
+    -c 0 \
+    -v
+```
+
+Explanation of Flags:
+	•	--rm → Removes the container after execution.
+	•	-v "$(pwd)/test_proteomes:/app/test_proteomes" → Mounts the input FASTA files.
+	•	-v "$(pwd)/output:/app/digested_glycopeptide_library" → Mounts the output directory.
+	•	gsf → Runs the built image.
+	•	-i → Specifies the input FASTA file.
+	•	-g → Sets the glycosylation type (default: N).
+	•	-o → Defines the output file.
+	•	-p → Specifies the protease (e.g., chymotrypsin).
+	•	-c → Defines the missed cleavages.
+	•	-v → Enables verbose mode.
+
+3. Access the Output
+
+The output files will be saved in the mounted directory on your local machine:
+
+```sh
+ls output/digested_glycopeptide_library/
+```
+
+Your results should be inside output/digested_glycopeptide_library/test.csv.
 
 ## License
 
