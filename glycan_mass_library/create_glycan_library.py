@@ -4,6 +4,8 @@ import os
 
 # Function to split the 'byonic' column into 'composition' and 'mass' columns
 def split_byonic(input_file, output_file):
+    """Splits the 'byonic' column into 'composition' and 'mass' columns in a CSV file."""
+    
     # Open the input and output CSV files
     with open(input_file, 'r') as infile, open(output_file, 'w', newline='') as outfile:
         reader = csv.DictReader(infile)  # Read the input CSV file as a dictionary
@@ -35,6 +37,7 @@ def main():
         args.output = f"{input_filename}_glycan_library.csv"
     
     split_byonic(args.input, args.output)  # Call the split_byonic function with the provided arguments
+    print(f'Output written to: {args.output}')  # Print the output file path
 
 # Entry point of the script
 if __name__ == "__main__":

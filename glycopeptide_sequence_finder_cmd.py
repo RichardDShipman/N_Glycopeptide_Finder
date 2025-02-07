@@ -39,7 +39,7 @@ Functions:
         Main function to parse arguments and execute the glycopeptide finding process.
 
 Usage:
-    python test_glycopeptide_sequence_finder_cmd.py -i <input_fasta_file> -o <output_csv_file> -p <protease> -g <glycosylation_type> -c <missed_cleavages> -l <log_file> -v -y <glycan_file> -z <max_charge>
+    python glycopeptide_sequence_finder_cmd.py -i <input_fasta_file> -o <output_csv_file> -p <protease> -g <glycosylation_type> -c <missed_cleavages> -l <log_file> -v -y <glycan_file> -z <max_charge>
 
 Author:
     Richard Shipman -- 2025
@@ -73,28 +73,71 @@ glycosylation = {
     "C": ("W..[WCF]")  # C-glycosylation sequon - W-X-X-W, W-X-X-C, or W-X-X-F (X is any amino acid).
 }
 
+# Define amino acid mass values for calculating peptide mass
+amino_acid_masses = {
+    'A': 71.03711, 'R': 156.10111, 'N': 114.04293, 'D': 115.02694, 'C': 103.00919,
+    'Q': 128.05858, 'E': 129.04259, 'G': 57.02146, 'H': 137.05891, 'I': 113.08406,
+    'L': 113.08406, 'K': 128.09496, 'M': 131.04049, 'F': 147.06841, 'P': 97.05276,
+    'S': 87.03203, 'T': 101.04768, 'W': 186.07931, 'Y': 163.06333, 'V': 99.06841
+}
+
+# Kyte-Doolittle hydrophobicity values for amino acids
+hydrophobicity_values = {
+    'A': 1.8, 'R': -4.5, 'N': -3.5, 'D': -3.5, 'C': 2.5,
+    'Q': -3.5, 'E': -3.5, 'G': -0.4, 'H': -3.2, 'I': 4.5,
+    'L': 3.8, 'K': -3.9, 'M': 1.9, 'F': 2.8, 'P': -1.6,
+    'S': -0.8, 'T': -0.7, 'W': -0.9, 'Y': -1.3, 'V': 4.2
+}
+
+# Define amino acid pKa values for calculating pI (placeholder)
+pKa_values = {
+    'C': 8.18, 'D': 3.65, 'E': 4.25, 'H': 6.00, 'K': 10.53,
+    'R': 12.48, 'Y': 10.07, 'N': 3.22, 'Q': 3.22, 'S': 3.70,
+    'T': 3.70, 'W': 10.07
+}
+
 # Define default glycan mass library as a DataFrame
 default_glycan_library = pd.DataFrame([
-    #{"glytoucan_ac": "G59324HL", "byonic": "HexNAc(2)Hex(12) % 2350.792627", "composition": "HexNAc(2)Hex(12)", "mass": 2350.792627}, # N2H12
-    #{"glytoucan_ac": "G58087IP", "byonic": "HexNAc(2)Hex(11) % 2188.739804", "composition": "HexNAc(2)Hex(11)", "mass": 2188.739804}, # N2H11
-    #{"glytoucan_ac": "G83460ZZ", "byonic": "HexNAc(2)Hex(10) % 2026.686980", "composition": "HexNAc(2)Hex(10)", "mass": 2026.686980}, # N2H10
-    {"glytoucan_ac": "G80920RR", "byonic": "HexNAc(2)Hex(9) % 1864.634157", "composition": "HexNAc(2)Hex(9)", "mass": 1864.634157}, # N2H9
-    {"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333}, # N2H8
-    {"glytoucan_ac": "G31852PQ", "byonic": "HexNAc(2)Hex(7) % 1540.528510", "composition": "HexNAc(2)Hex(7)", "mass": 1540.528510}, # N2H7
-    {"glytoucan_ac": "G41247ZX", "byonic": "HexNAc(2)Hex(6) % 1378.475686", "composition": "HexNAc(2)Hex(6)", "mass": 1378.475686}, # N2H6
+    #{"glytoucan_ac": "G59324HL", "byonic": "HexNAc(2)Hex(12) % 2350.792627", "composition": "HexNAc(2)Hex(12)", "mass": 2350.792627, "shorthand_glycan": "N2H12"}, # N2H12
+    #{"glytoucan_ac": "G58087IP", "byonic": "HexNAc(2)Hex(11) % 2188.739804", "composition": "HexNAc(2)Hex(11)", "mass": 2188.739804, "shorthand_glycan": "N2H11"}, # N2H11
+    #{"glytoucan_ac": "G83460ZZ", "byonic": "HexNAc(2)Hex(10) % 2026.686980", "composition": "HexNAc(2)Hex(10)", "mass": 2026.686980, "shorthand_glycan": "N2H10"}, # N2H10
+    #{"glytoucan_ac": "G80920RR", "byonic": "HexNAc(2)Hex(9) % 1864.634157", "composition": "HexNAc(2)Hex(9)", "mass": 1864.634157, "shorthand_glycan": "N2H9"}, # N2H9
+    {"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333, "shorthand_glycan": "N2H8"}, # N2H8
+    #{"glytoucan_ac": "G31852PQ", "byonic": "HexNAc(2)Hex(7) % 1540.528510", "composition": "HexNAc(2)Hex(7)", "mass": 1540.528510, "shorthand_glycan": "N2H7"}, # N2H7
+    #{"glytoucan_ac": "G41247ZX", "byonic": "HexNAc(2)Hex(6) % 1378.475686", "composition": "HexNAc(2)Hex(6)", "mass": 1378.475686, "shorthand_glycan": "N2H6"}, # N2H6
 ])
 
 # Define monosaccharide mass library with multiple properties (later use)
 monosaccharide_library = {
-    "Hex": {"mass": 162.0528, "formula": "C6H10O5"},
-    "HexNAc": {"mass": 203.0794, "formula": "C8H13NO5"},
-    "Fuc": {"mass": 146.0579, "formula": "C6H12O5"},
-    "NeuAc": {"mass": 291.0954, "formula": "C11H17NO8"},
-    "NeuGc": {"mass": 307.0903, "formula": "C11H17NO9"},
-    "Pent": {"mass": 132.0423, "formula": "C5H10O5"},
-    "Sulpho": {"mass": 79.9568, "formula": "SO3"},
-    "Phospho": {"mass": 79.9663, "formula": "PO3"},
-    "dHex": {"mass": 146.0579, "formula": "C6H12O5"}
+    "Hex": {"mass": 162.0528, "formula": "C6H10O5", "symbol": "H"},
+    "HexA": {"mass": 176.0321, "formula": "C6H8O6", "symbol": "Ha"},
+    "HexNAc": {"mass": 203.0794, "formula": "C8H13NO5", "symbol": "N"},
+    "Fuc": {"mass": 146.0579, "formula": "C6H12O5", "symbol": "F"},
+    "dHex": {"mass": 146.0579, "formula": "C6H12O5", "symbol": "dH"},
+    "NeuAc": {"mass": 291.0954, "formula": "C11H17NO8", "symbol": "S"},
+    "NeuGc": {"mass": 307.0903, "formula": "C11H17NO9", "symbol": "G"},
+    "Xyl": {"mass": 150.0423, "formula": "C5H10O5", "symbol": "X"},
+    "Pent": {"mass": 132.0423, "formula": "C5H10O5", "symbol": "P"},
+    "Sulpho": {"mass": 79.9568, "formula": "SO3", "symbol": "Su"},
+    "Phospho": {"mass": 79.9663, "formula": "PO3", "symbol": "Ph"},
+    "Methyl": {"mass": 14.0157, "formula": "CH3", "symbol": "Me"},
+    "Acetyl": {"mass": 42.0106, "formula": "C2H3O", "symbol": "Ac"},
+    "Deoxy": {"mass": -18.0106, "formula": "H2O", "symbol": "d"},
+    "Amine": {"mass": 1.0078, "formula": "H", "symbol": "NH2"}
+}
+
+# Define hydrophobicity values for glycan library (experimental) 
+# (between -1 and 1) in relation to the peptide backbone and rank spread of glycopeptides with the same backdone.
+# compute_glycan_hydrophobicity.py script will be used to calculate the hydrophobicity values.
+# averaged aggregated from human and mouse datasets
+default_glycan_hydrophobicity = {
+    "N2H8": -0.0062899,
+    "N2H7": -0.005723031,
+    "N2H6": -0.004347122,
+    "N2H9": -0.001982055,
+    "N2H10": -0.001554309,
+    "N2H11": -2.53305E-05,
+    "N2H12": 5.36847E-06
 }
 
 def cleave_sequence(sequence, protease, missed_cleavages=0):
@@ -131,25 +174,19 @@ def find_glycopeptides(peptides, full_sequence, glycosylation_type):
 
 def calculate_peptide_mass(sequence):
     """Calculates the mass of a peptide, ignoring sequences with unknown residues."""
-    invalid_residues = {"X", "B", "Z", "J", "U", "O"}  # Common ambiguous residues
+    
+    # Common ambiguous residues
+    invalid_residues = {"X", "B", "Z", "J", "U", "O"}  
     if any(aa in invalid_residues for aa in sequence):
-        return "Unknown"  # Or return None if you prefer
-    return calculate_mass(sequence=sequence)
+        return "Unknown"  # Or return unknown if you prefer
+    return calculate_mass(sequence=sequence) # Use pyteomics to calculate the mass
 
 def predict_hydrophobicity(peptide_sequence):
     """Predicts the hydrophobicity of a peptide sequence using the Kyte-Doolittle scale."""
     
-    # Kyte-Doolittle hydrophobicity values for amino acids
-    hydrophobicity_values = {
-        'A': 1.8, 'R': -4.5, 'N': -3.5, 'D': -3.5, 'C': 2.5,
-        'Q': -3.5, 'E': -3.5, 'G': -0.4, 'H': -3.2, 'I': 4.5,
-        'L': 3.8, 'K': -3.9, 'M': 1.9, 'F': 2.8, 'P': -1.6,
-        'S': -0.8, 'T': -0.7, 'W': -0.9, 'Y': -1.3, 'V': 4.2
-    }
-
     # Calculate the average hydrophobicity of the peptide
     total_hydrophobicity = sum(hydrophobicity_values.get(aa, 0) for aa in peptide_sequence)
-    average_hydrophobicity = round(total_hydrophobicity / len(peptide_sequence), 2)
+    average_hydrophobicity = round(total_hydrophobicity / len(peptide_sequence), 5)
 
     return average_hydrophobicity
 
@@ -173,20 +210,41 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
     peptides['PredictedMass'] = peptides['PredictedMass'].astype(float)
     glycans['mass'] = glycans['mass'].astype(float)
     
+    # Initialize list to store results
     results = []
     
-    # Generate glycopeptides and compute m/z values
+    # Generate glycopeptides, compute m/z values, compute HF_experimental
     for _, pep in peptides.iterrows():
         for _, gly in glycans.iterrows():
+
+            # Compute glycopeptide mass
             glycopeptide_mass = pep['PredictedMass'] + gly['mass']
+
+            # Compute m/z values for charge states from 2 to max_charge
             mz_values = {f'z{z}': compute_mz(glycopeptide_mass, z) for z in range(2, max_charge + 1)}
+
+            # Compute HF_w (weight of the glycan HF) -- EXPERIMENTAL
+            # HF_w = 10
+
+            # Compute HF_experimental values
+            # if gly['converted_glycan'] in default_glycan_hydrophobicity:
+            #     HF_experimental = pep['Hydrophobicity'] + default_glycan_hydrophobicity[gly['converted_glycan']] * HF_w
+            # else:
+            #     HF_experimental = ""
             
+            # Set retension time scale (default 0-60)
+            #rt_scale = 60
+
+            # Scale the HF_experimental value between 0 and 60
+            #rt_HF_experimental = (default_glycan_hydrophobicity[gly['converted_glycan']] * HF_w + 1) * (rt_scale / 2)
+
             # Create a dictionary with the results
             result = {
                 'ProteinID': pep['ProteinID'],
                 'Site': pep['Site'],
-                'glytoucan_ac': gly['glytoucan_ac'],
-                'composition': gly['composition'],
+                'GlyToucan_AC': gly['glytoucan_ac'],
+                'Composition': gly['composition'],
+                #'converted_glycan': gly['converted_glycan'],
                 'Peptide': pep['Peptide'],
                 'Start': pep['Start'],
                 'End': pep['End'],
@@ -194,7 +252,7 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
                 'Sequon': pep['Sequon'],
                 'GlycopeptideMass': glycopeptide_mass,
                 'PeptideMass': pep['PredictedMass'],
-                'glycan_mass': gly['mass'],
+                'GlycanMass': gly['mass'],
                 'Hydrophobicity': pep['Hydrophobicity'],
                 'pI': pep['pI'],
                 'Protease': pep['Protease'],
@@ -205,7 +263,9 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
                 'GeneName': pep['GeneName'],
                 'ProteinEvidence': pep['ProteinEvidence'],
                 'SequenceVersion': pep['SequenceVersion'],
-                **mz_values
+                **mz_values, # z charge states values
+                #'HF_experimental': round(HF_experimental, 5),
+                #'rt_HF_experimental': rt_HF_experimental 
             }
             results.append(result)
     
@@ -321,6 +381,7 @@ def main():
     charge_state = args.charge
     glycan_library = args.glycan
 
+    # Load glycan library
     if glycan_library is None:
         glycans = default_glycan_library
     else:
