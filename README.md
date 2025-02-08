@@ -438,6 +438,10 @@ Shu, Qingbo, Mengjie Li, Lian Shu, Zhiwu An, Jifeng Wang, Hao Lv, Ming Yang, et 
 
 Wang, Junyao, Aiying Yu, Byeong Gwan Cho, and Yehia Mechref. “Assessing the Hydrophobicity of Glycopeptides Using Reversed-Phase Liquid Chromatography and Tandem Mass Spectrometry.” Journal of Chromatography. A 1706 (September 13, 2023): 464237. https://doi.org/10.1016/j.chroma.2023.464237.
 
+- Molecular Basis of C-Mannosylation – a Structural Perspective.
+
+Crine, Samuel L., and K. Ravi Acharya. “Molecular Basis of C-Mannosylation – a Structural Perspective.” The FEBS Journal 289, no. 24 (2022): 7670–87. https://doi.org/10.1111/febs.16265.
+
 - BioPython for handling FASTA files.
 
 Cock, P. J., Antao, T., Chang, J. T., Chapman, B. A., Cox, C. J., Dalke, A., … others. (2009). Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics, 25(11), 1422–1423.

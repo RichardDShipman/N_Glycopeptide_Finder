@@ -48,8 +48,7 @@ import argparse
 import csv
 import re
 from Bio import SeqIO
-from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
-from pyteomics.mass import calculate_mass
+#from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 import os
 import logging
 import pandas as pd
@@ -96,8 +95,9 @@ pKa_values = {
     'T': 3.70, 'W': 10.07
 }
 
-# Define default glycan mass library as a DataFrame
-default_glycan_library = pd.DataFrame([
+
+# Define default N-glycan mass library as a DataFrame (N-Glycans) Using most common N-glycans as default, HexNAc(2)Hex(8) with no stereochemistry
+default_n_glycan_library = pd.DataFrame([
     #{"glytoucan_ac": "G59324HL", "byonic": "HexNAc(2)Hex(12) % 2350.792627", "composition": "HexNAc(2)Hex(12)", "mass": 2350.792627, "shorthand_glycan": "N2H12"}, # N2H12
     #{"glytoucan_ac": "G58087IP", "byonic": "HexNAc(2)Hex(11) % 2188.739804", "composition": "HexNAc(2)Hex(11)", "mass": 2188.739804, "shorthand_glycan": "N2H11"}, # N2H11
     #{"glytoucan_ac": "G83460ZZ", "byonic": "HexNAc(2)Hex(10) % 2026.686980", "composition": "HexNAc(2)Hex(10)", "mass": 2026.686980, "shorthand_glycan": "N2H10"}, # N2H10
@@ -105,6 +105,16 @@ default_glycan_library = pd.DataFrame([
     {"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333, "shorthand_glycan": "N2H8"}, # N2H8
     #{"glytoucan_ac": "G31852PQ", "byonic": "HexNAc(2)Hex(7) % 1540.528510", "composition": "HexNAc(2)Hex(7)", "mass": 1540.528510, "shorthand_glycan": "N2H7"}, # N2H7
     #{"glytoucan_ac": "G41247ZX", "byonic": "HexNAc(2)Hex(6) % 1378.475686", "composition": "HexNAc(2)Hex(6)", "mass": 1378.475686, "shorthand_glycan": "N2H6"}, # N2H6
+])
+
+# Define default O-glycan mass library as a DataFrame (O-GalNAc Glycans) Using most common O-glycans as default, HexNac(1) with no stereochemistry
+default_o_glycan_library = pd.DataFrame([
+    {"glytoucan_ac": "G14843DJ", "byonic": "HexNAc(1) % 221.089937305", "composition": "HexNAc(1)", "mass": 221.089937305, "shorthand_glycan": "N1"}, # N1
+])
+
+# Define default C-glycan mass library as a DataFrame (C-Mannosylation) Using most common C-glycans as default, Hex(1) with no stereochemistry
+default_c_glycan_library = pd.DataFrame([
+    {"glytoucan_ac": "G81399MY", "byonic": "Hex(1) % 180.0633882", "composition": "Hex(1)", "mass": 180.0633882, "shorthand_glycan": "H1"}, # H1
 ])
 
 # Define monosaccharide mass library with multiple properties (later use)
@@ -173,13 +183,16 @@ def find_glycopeptides(peptides, full_sequence, glycosylation_type):
     return glycopeptides
 
 def calculate_peptide_mass(sequence):
-    """Calculates the mass of a peptide, ignoring sequences with unknown residues."""
+    """Calculates the mass of a peptide using predefined amino acid masses."""
     
     # Common ambiguous residues
     invalid_residues = {"X", "B", "Z", "J", "U", "O"}  
     if any(aa in invalid_residues for aa in sequence):
         return "Unknown"  # Or return unknown if you prefer
-    return calculate_mass(sequence=sequence) # Use pyteomics to calculate the mass
+    
+    # Calculate the mass using the amino_acid_masses dictionary
+    mass = sum(amino_acid_masses.get(aa, 0) for aa in sequence)
+    return mass
 
 def predict_hydrophobicity(peptide_sequence):
     """Predicts the hydrophobicity of a peptide sequence using the Kyte-Doolittle scale."""
@@ -191,9 +204,55 @@ def predict_hydrophobicity(peptide_sequence):
     return average_hydrophobicity
 
 def calculate_pI(peptide_sequence):
-    """Calculates the isoelectric point (pI) of a peptide sequence."""
-    pI_calculator = IsoelectricPoint(peptide_sequence)
-    return round(pI_calculator.pi(), 2)
+    """
+    Calculate the isoelectric point (pI) of a peptide sequence.
+    
+    Parameters:
+        peptide (str): Peptide sequence (1-letter amino acid codes)
+    
+    Returns:
+        float: Estimated isoelectric point (pI)
+    """
+
+    # Terminal group pKa values (assuming N-term = 9.6, C-term = 2.3)
+    N_term_pKa = 9.6
+    C_term_pKa = 2.3
+
+    # Count occurrences of ionizable residues
+    residue_counts = {aa: peptide_sequence.count(aa) for aa in pKa_values}
+    
+    # Function to calculate charge at a given pH
+    def calculate_net_charge(pH):
+        charge = 0.0
+
+        # N-terminal charge
+        charge += 1 / (1 + 10**(pH - N_term_pKa))
+
+        # C-terminal charge
+        charge -= 1 / (1 + 10**(C_term_pKa - pH))
+
+        # Side chain charges
+        for aa, count in residue_counts.items():
+            if count > 0:
+                pKa = pKa_values[aa]
+                if aa in ['D', 'E', 'Y', 'C']:  # Acidic side chains
+                    charge -= count / (1 + 10**(pKa - pH))
+                elif aa in ['H', 'K', 'R']:  # Basic side chains
+                    charge += count / (1 + 10**(pH - pKa))
+        
+        return charge
+
+    # Use bisection method to find the pH where net charge is closest to zero
+    low, high = 0.0, 14.0
+    while high - low > 0.01:  # Precision threshold
+        mid = (low + high) / 2
+        net_charge = calculate_net_charge(mid)
+        if net_charge > 0:
+            low = mid
+        else:
+            high = mid
+
+    return round((low + high) / 2, 2)
 
 def compute_mz(mass, charge):
     """Compute m/z value for a given mass and charge state."""
@@ -258,11 +317,11 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
                 'Protease': pep['Protease'],
                 'GlycosylationType': pep['GlycosylationType'],
                 'MissedCleavages': pep['MissedCleavages'],
-                'Species': pep['Species'],
-                'TaxonID': pep['TaxonID'],
-                'GeneName': pep['GeneName'],
-                'ProteinEvidence': pep['ProteinEvidence'],
-                'SequenceVersion': pep['SequenceVersion'],
+                #'Species': pep['Species'],
+                #'TaxonID': pep['TaxonID'],
+                #'GeneName': pep['GeneName'],
+                #'ProteinEvidence': pep['ProteinEvidence'],
+                #'SequenceVersion': pep['SequenceVersion'],
                 **mz_values, # z charge states values
                 #'HF_experimental': round(HF_experimental, 5),
                 #'rt_HF_experimental': rt_HF_experimental 
@@ -278,6 +337,8 @@ def setup_logging(log_file):
 
 def process_fasta(file, protease, missed_cleavages, glycosylation_type):
     """Processes the input FASTA file and extracts glycopeptides."""
+    
+    # Initialize list to store results
     results = []
 
     # Regular expression to capture OS and OX from the header
@@ -288,7 +349,8 @@ def process_fasta(file, protease, missed_cleavages, glycosylation_type):
         protein_id = record.id
         sequence = str(record.seq)
 
-        header = record.description  # Get the full description line
+        # Get the full description line
+        header = record.description  
         
         # Use regex to find OS, OX, GN, PE, and SV
         match = re.search(os_ox_pattern, header)
@@ -336,11 +398,11 @@ def process_fasta(file, protease, missed_cleavages, glycosylation_type):
                 "Protease": protease,
                 "GlycosylationType": glycosylation_type,
                 "MissedCleavages": missed_cleavages,
-                "Species": os_value,
-                "TaxonID": ox_value,
-                "GeneName": gn_value,
-                "ProteinEvidence": pe_value,
-                "SequenceVersion": sv_value
+                #"Species": os_value, # Uncomment to include 
+                #"TaxonID": ox_value,
+                #"GeneName": gn_value,
+                #"ProteinEvidence": pe_value,
+                #"SequenceVersion": sv_value
             })
 
     return results
@@ -380,6 +442,21 @@ def main():
     glycosylation_type = args.glycosylation
     charge_state = args.charge
     glycan_library = args.glycan
+
+    # Set default glycan library based on glycosylation type only if no glycan library is provided
+    if glycan_library is None:
+        if glycosylation_type == "N":
+            default_glycan_library = default_n_glycan_library
+        elif glycosylation_type == "O":
+            default_glycan_library = default_o_glycan_library
+        elif glycosylation_type == "C":
+            default_glycan_library = default_c_glycan_library
+        else:
+            if args.log:
+                logging.error(f"Glycosylation type {glycosylation_type} is not supported. Supported glycosylation types: N, O, C.")
+            return
+    else:
+        default_glycan_library = None
 
     # Load glycan library
     if glycan_library is None:
