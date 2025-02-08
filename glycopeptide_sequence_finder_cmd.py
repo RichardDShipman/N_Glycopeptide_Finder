@@ -194,8 +194,11 @@ def calculate_peptide_mass(sequence):
     if any(aa in invalid_residues for aa in sequence):
         return "Unknown"  # Or return unknown if you prefer
     
+    # water
+    water  = 18.010565
+
     # Calculate the mass using the amino_acid_masses dictionary
-    mass = sum(amino_acid_masses.get(aa, 0) for aa in sequence)
+    mass = sum(amino_acid_masses.get(aa, 0) for aa in sequence) + water
     return mass
 
 def predict_hydrophobicity(peptide_sequence):
@@ -398,6 +401,118 @@ def process_fasta(file, protease, missed_cleavages, glycosylation_type):
 
     return pd.DataFrame(results)
 
+# Function to Calculate glycopeptide ion series m/z values
+def calculate_n_glycopeptide_ions(peptide, glycan_composition, glycan_frag_order=None, charge=1):
+    """
+    Calculate theoretical m/z values for b, y, Y, B, oxonium ions, and sugar chunks of a glycopeptide.
+    
+    Parameters:
+      peptide (str): The peptide sequence (e.g., "NTSK").
+      glycan_composition (str): A string representing the glycan composition, e.g., "HexNAc(2)Hex(8)".
+      glycan_frag_order (list, optional): A list specifying the order of sugar losses.
+                                          If provided, it is used to simulate sequential 
+                                          loss for Y and B ion series and to generate sugar chunks.
+      charge (int): The charge state (default is 1).
+      
+    Returns:
+      dict: A dictionary with keys 'b', 'y', 'Y', 'B', 'oxonium', and 'chunks' containing
+            the calculated m/z values.
+    """
+    # Constants (monoisotopic masses in Da)
+    proton = 1.007276
+    water  = 18.010565
+
+    # Compute the neutral mass of the peptide (include water for the full peptide mass)
+    peptide_mass = sum(amino_acid_masses[aa] for aa in peptide) + water
+
+    # Parse glycan composition string into a dictionary
+    glycan_dict = {}
+    for part in glycan_composition.split(')'):
+        if part:
+            sugar, count = part.split('(')
+            glycan_dict[sugar] = int(count)
+
+    # --- Calculate b ions ---
+    b_ions = []
+    cumulative = 0.0
+    # b ions: cumulative from the N-terminus (excluding the full peptide)
+    for i in range(len(peptide) - 1):
+        cumulative += amino_acid_masses[peptide[i]]
+        b_val = cumulative + proton  # b ion mass = sum + proton
+        b_ions.append(round(b_val / charge, 4))
+    
+    # --- Calculate y ions ---
+    y_ions = []
+    cumulative = 0.0
+    # y ions: cumulative from the C-terminus (excluding the full peptide)
+    for i in range(len(peptide) - 1, 0, -1):
+        cumulative += amino_acid_masses[peptide[i]]
+        y_val = cumulative + water + proton  # y ion mass = sum + water + proton
+        y_ions.insert(0, round(y_val / charge, 4))
+    
+    # --- Glycan Calculations ---
+    glycan_total_mass = sum(monosaccharide_library[sugar]['mass'] * count for sugar, count in glycan_dict.items())
+    intact_glycopeptide_mass = peptide_mass + glycan_total_mass
+
+    # --- Calculate Y ions (peptide + residual glycan fragment) ---
+    Y_ions = {}
+    if glycan_frag_order:
+        current_mass = intact_glycopeptide_mass
+        Y_ions['Y0'] = round((current_mass + proton) / charge, 4)
+        for i, sugar in enumerate(glycan_frag_order, start=1):
+            current_mass -= monosaccharide_library[sugar]['mass']
+            Y_ions[f'Y{i}'] = round((current_mass + proton) / charge, 4)
+    else:
+        # Default approach for many N-glycopeptides:
+        Y_ions['Y0'] = round((peptide_mass + proton) / charge, 4)
+        if glycan_dict.get('HexNAc', 0) > 0:
+            Y_ions['Y1'] = round((peptide_mass + monosaccharide_library['HexNAc']['mass'] + proton) / charge, 4)
+        if glycan_dict.get('HexNAc', 0) > 1:
+            Y_ions['Y2'] = round((peptide_mass + 2 * monosaccharide_library['HexNAc']['mass'] + proton) / charge, 4)
+    
+    # # --- Calculate B ions (glycan fragment ions) ---
+    # B_ions = {}
+    # if glycan_frag_order:
+    #     cumulative = 0.0
+    #     for i, sugar in enumerate(glycan_frag_order, start=1):
+    #         cumulative += monosaccharide_library[sugar]['mass']
+    #         B_ions[f'B{i}'] = round((cumulative + proton) / charge, 4)
+    # else:
+    #     # Report common oxonium ions as B ions if no fragmentation order is given.
+    #     if glycan_dict.get('HexNAc', 0) > 0:
+    #         B_ions['B_HexNAc'] = round((monosaccharide_library['HexNAc']['mass'] + proton) / charge, 4)
+    #     if glycan_dict.get('Hex', 0) > 0:
+    #         B_ions['B_Hex'] = round((monosaccharide_library['Hex']['mass'] + proton) / charge, 4)
+    
+    # # --- Calculate Oxonium ions ---
+    # # These are common low–m/z ions originating from individual sugar units.
+    # oxonium_ions = {}
+    # for sugar, count in glycan_dict.items():
+    #     if count > 0:
+    #         oxonium_ions[f'ox_{sugar}'] = round(monosaccharide_library[sugar]['mass'] + proton, 4)
+    
+    # --- Calculate Sugar Chunks (contiguous groups of sugars) ---
+    # This simulates the possibility that multiple sugars break off together.
+    # sugar_chunks = {}
+    # if glycan_frag_order:
+    #     n = len(glycan_frag_order)
+    #     # Enumerate all contiguous subsequences (chunks)
+    #     for i in range(n):
+    #         for j in range(i, n):
+    #             chunk_label = f"chunk_{i+1}-{j+1}"
+    #             chunk_mass = sum(monosaccharide_library[sugar]['mass'] for sugar in glycan_frag_order[i:j+1])
+    #             # Adding a proton to simulate a charged fragment
+    #             sugar_chunks[chunk_label] = round((chunk_mass + proton) / charge, 4)
+
+    return {
+        'b': b_ions,
+        'y': y_ions,
+        'Y': Y_ions,
+        #'B': B_ions,
+        #'oxonium': oxonium_ions,
+        #'chunks': sugar_chunks
+    }
+
 # Add this function to write the results to a CSV file
 def write_csv(output_file, data):
     """Writes results to a CSV file."""
@@ -481,6 +596,10 @@ def main():
         if args.log: # Log the error
             logging.error(f"Protease {args.protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
         return
+
+    # test calculate_n_glycopeptide_ions function
+    x = calculate_n_glycopeptide_ions("NST", "HexNAc(2)Hex(8)Fuc(1)")
+    print(x)
 
     # WORKFLOW STARTS HERE
 
@@ -600,6 +719,9 @@ def main():
 
         # Process glycopeptides and compute m/z values
         glycopeptide_results = process_glycopeptides(output_file, glycans, charge_state)
+
+        # Compute Ion Series
+        glycopeptide_results["IonSeries"] = glycopeptide_results.apply(lambda row: calculate_n_glycopeptide_ions(row["Peptide"], row["Composition"]), axis=1)
 
         # Write the results to a new CSV file
         glycopeptide_results.to_csv(glycopeptide_output_file, index=False)
