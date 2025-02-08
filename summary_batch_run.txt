@@ -45,8 +45,8 @@ Thank you for using the Glycopeptide Sequence Finder! Please come back when you'
             H-N-C-C-O--PEPTIDE--N-C-C-O-H-N-C-C-O-H
                     |  SEQUENCE   |         |
                     R   FINDER    R         R
-                 /                 \        \
-                N-Glycan            O-Glycan   C-Glycan
+                   /               \        \
+                  N-Glycan          O-Glycan   C-Glycan
         ╰────────────────────────────────────────────╯
                     ╲
                     💬 "I crave more glycopeptides! Bring me more proteomes!"

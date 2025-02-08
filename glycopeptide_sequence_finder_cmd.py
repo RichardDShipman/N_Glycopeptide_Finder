@@ -331,7 +331,7 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
                 'MissedCleavages': pep['MissedCleavages'],
                 #'Species': pep['Species'],
                 #'TaxonID': pep['TaxonID'],
-                #'GeneName': pep['GeneName'],
+                'GeneName': pep['GeneName'],
                 #'ProteinEvidence': pep['ProteinEvidence'],
                 #'SequenceVersion': pep['SequenceVersion'],
                 **mz_values, # z charge states values
@@ -623,7 +623,7 @@ def main():
         #digest_peptide_library["MissedCleavages"] = missed_cleavages
         #digest_peptide_library["Species"] = results_df["Species"].tolist()[0]
         #digest_peptide_library["TaxonID"] = results_df["TaxonID"].tolist()[0]
-        #digest_peptide_library["GeneName"] = results_df["GeneName"].tolist()[0]
+        digest_peptide_library["GeneName"] = results_df["GeneName"].tolist()[0]
         #digest_peptide_library["ProteinEvidence"] = results_df["ProteinEvidence"].tolist()[0]
         #digest_peptide_library["SequenceVersion"] = results_df["SequenceVersion"].tolist()[0]
 
@@ -676,7 +676,7 @@ def main():
                     #"MissedCleavages": missed_cleavages,
                     #"Species": row["Species"], # Uncomment to include 
                     #"TaxonID": row["TaxonID"],
-                    #"GeneName": row["GeneName"],
+                    "GeneName": row["GeneName"],
                     #"ProteinEvidence": row["ProteinEvidence"],
                     #"SequenceVersion": row["SequenceVersion"]
                 })
@@ -721,6 +721,7 @@ def main():
 
         # Write the results to a new CSV file
         glycopeptide_results.to_csv(glycopeptide_output_file, index=False)
+        #print(glycopeptide_results)
         #print(f"Glycopeptide results written to {glycopeptide_output_file}. Processing complete.")
 
         # Log the completion of the glycopeptide processing
