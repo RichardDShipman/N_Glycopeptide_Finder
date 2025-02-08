@@ -73,6 +73,18 @@ echo "LET'S GO ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 sleep 1
 echo "Ope! Here I got glycopeptiding again! 🤣"
 sleep 3
+echo "WARNING: CPU TEMP THRESHOLD EXCEEDED! 🔥"
+echo ""
+echo "Traceback (most recent call last):"
+echo "  File \"<system>\", line 42, in monitor_cpu"
+echo "    check_temperature()"
+echo "  File \"<system>\", line 17, in check_temperature"
+echo "    raise OverheatedCPUError(\"CPU temperature is too high! 🚨\")"
+echo "OverheatedCPUError: CPU Temp: 108°C | Safe Range: 30°C - 80°C 🌡️"
+echo ""
+echo "💀 ACTION REQUIRED: Cool down your system or prepare for thermal throttling! 🔥"
+sleep 1
+echo "Rebooting finder. Beeep booop. *sounds*"
 
 # Run the glycopeptide sequence finder script
 time ls ${input_dir}/*.fasta | xargs -I {} -P ${cores} python glycopeptide_sequence_finder_cmd.py \
@@ -93,19 +105,6 @@ peptide_count=$(tail -n +2 digested_peptide_library/*.csv | wc -l)
 glycopeptide_count=$(tail -n +2 digested_glycopeptide_library/*.csv | wc -l)
 
 # Mess with user
-sleep 5
-echo "WARNING: CPU TEMP THRESHOLD EXCEEDED! 🔥"
-echo ""
-echo "Traceback (most recent call last):"
-echo "  File \"<system>\", line 42, in monitor_cpu"
-echo "    check_temperature()"
-echo "  File \"<system>\", line 17, in check_temperature"
-echo "    raise OverheatedCPUError(\"CPU temperature is too high! 🚨\")"
-echo "OverheatedCPUError: CPU Temp: 108°C | Safe Range: 30°C - 80°C 🌡️"
-echo ""
-echo "💀 ACTION REQUIRED: Cool down your system or prepare for thermal throttling! 🔥"
-sleep 1
-echo "Reboot"
 echo "🔥 SYSTEM OVERHEAT DETECTED 🔥"
 echo ""
 echo "Traceback (most recent call last):"
@@ -129,14 +128,12 @@ ascii_glycopeptide2="
     I D E N T I F I E D: $glycopeptide_count $protease-digested $glycosylation_type-glycopeptide sequences.                                      
     I D E N T I F I E D: $peptide_count $protease-digested peptide sequences.
         ╭────────────────────────────────────────────╮
-
                         GLYCO-
             H-N-C-C-O--PEPTIDE--N-C-C-O-H-N-C-C-O-H
                     |  SEQUENCE   |         |
                     R   FINDER    R         R
-                 /                 \\        \\
-                N-Glycan            O-Glycan   C-Glycan
-
+                   /               \\        \\
+                  N-Glycan          O-Glycan   C-Glycan
         ╰────────────────────────────────────────────╯
                     ╲
                     💬 \"I crave more glycopeptides! Bring me more proteomes!\"

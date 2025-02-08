@@ -26,7 +26,7 @@ This analysis highlights the successful identification of glycopeptides, which s
 The findings provide valuable insight into the glycosylation landscape of the proteome by calculating the mass spectrometry properties of peptides and glycopeptides, laying the groundwork for more advanced analyses in future research.
 ---------------------------------------------------------------------------
 Batch Run Summary:
-Total Elapsed Time: 1.01 minutes
+Total Elapsed Time: 1.03 minutes
 Protease Used: trypsin
 Missed Cleavages: 0
 Glycosylation Type: N-Glycosylation
@@ -41,14 +41,12 @@ Thank you for using the Glycopeptide Sequence Finder! Please come back when you'
     I D E N T I F I E D:   318582 trypsin-digested N-glycopeptide sequences.                                      
     I D E N T I F I E D:  3308719 trypsin-digested peptide sequences.
         ╭────────────────────────────────────────────╮
-
                         GLYCO-
             H-N-C-C-O--PEPTIDE--N-C-C-O-H-N-C-C-O-H
                     |  SEQUENCE   |         |
                     R   FINDER    R         R
                  /                 \        \
                 N-Glycan            O-Glycan   C-Glycan
-
         ╰────────────────────────────────────────────╯
                     ╲
                     💬 "I crave more glycopeptides! Bring me more proteomes!"

@@ -597,10 +597,6 @@ def main():
             logging.error(f"Protease {args.protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
         return
 
-    # test calculate_n_glycopeptide_ions function
-    x = calculate_n_glycopeptide_ions("NST", "HexNAc(2)Hex(8)Fuc(1)")
-    print(x)
-
     # WORKFLOW STARTS HERE
 
     # Process the input file with the selected protease(s)
