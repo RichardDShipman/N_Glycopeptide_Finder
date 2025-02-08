@@ -1,0 +1,58 @@
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔬 F I N D I N G   G L Y C O P E P T I D E   S E Q U E N C E S ! ! ! 🔬
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                 GLYCO-
+      H-N-C-C-O--PEPTIDE--N-C-C-O-H-N-C-C-O-H
+          |      SEQUENCE   |         |
+          R      FINDER     R         R
+         /                  \          \
+        N-Glycan             O-Glycan   C-Glycan
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📊 P R E D I C T I N G   G L Y C O P E P T I D E   P R O P E R T I E S ! ! ! 📊
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+==================== Glycopeptide Sequence Finder Summary ====================
+After some finding and searching for glycopeptides in input protein/proteome FASTA...
+Total Peptide Sequences Found:  3308719
+Peptides generated using trypsin digestion with 0 missed cleavages.
+You really know how to slice and dice those peptides! 😎🍴
+Total Glycopeptide Sequences Found:   318562
+You've discovered an impressive number of glycopeptides! Keep it up, Glycoscientist! 🏆
+---------------------------------------------------------------------------
+After performing an extensive computational search for glycopeptides in the input protein/proteome FASTA dataset, a total of  3308719 peptide sequences were identified in the digested_peptide_library.
+These peptides were generated through trypsin digestion, with 0 to 0 missed cleavages observed during the process.
+Additionally, glycopeptide sequences were detected, yielding a total of   318562 glycopeptides in the digested_glycopeptide_library.
+This analysis highlights the successful identification of glycopeptides, which serves as a critical step in the ongoing study of glycoproteomics and the characterization of glycosylation patterns across various proteins.
+The findings provide valuable insight into the glycosylation landscape of the proteome by calculating the mass spectrometry properties of peptides and glycopeptides, laying the groundwork for more advanced analyses in future research.
+---------------------------------------------------------------------------
+Batch Run Summary:
+Total Elapsed Time: .91 minutes
+Protease Used: trypsin
+Missed Cleavages: 0
+Glycosylation Type: N-Glycosylation
+Number of Peptide Sequences:  3308719
+Number of N-Glycopeptide Sequences:   318562
+---------------------------------------------------------------------------
+Thank you for using the Glycopeptide Sequence Finder! Please come back when you're ready to discover more glycopeptides!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🔬 F O U N D   G L Y C O P E P T I D E   S E Q U E N C E S ! ! ! 🔬
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━                                   
+    I D E N T I F I E D:   318562 trypsin-digested N-glycopeptide sequences.                                      
+    I D E N T I F I E D:  3308719 trypsin-digested peptide sequences.
+        ╭────────────────────────────────────────────╮
+
+                        GLYCO-
+            H-N-C-C-O--PEPTIDE--N-C-C-O-H-N-C-C-O-H
+                    |  SEQUENCE   |         |
+                    R   FINDER    R         R
+                 /                 \        \
+                N-Glycan            O-Glycan   C-Glycan
+
+        ╰────────────────────────────────────────────╯
+                    ╲
+                    💬 "I crave more glycopeptides! Bring me more proteomes!"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    📊 P R E D I C T E D   G L Y C O P E P T I D E   P R O P E R T I E S ! ! ! 📊
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+---------------------------------------------------------------------------

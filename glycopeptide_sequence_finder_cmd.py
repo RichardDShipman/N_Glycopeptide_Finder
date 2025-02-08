@@ -48,7 +48,6 @@ import argparse
 import csv
 import re
 from Bio import SeqIO
-#from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 import os
 import logging
 import pandas as pd
@@ -94,7 +93,6 @@ pKa_values = {
     'R': 12.48, 'Y': 10.07, 'N': 3.22, 'Q': 3.22, 'S': 3.70,
     'T': 3.70, 'W': 10.07
 }
-
 
 # Define default N-glycan mass library as a DataFrame (N-Glycans) Using most common N-glycans as default, HexNAc(2)Hex(8) with no stereochemistry
 default_n_glycan_library = pd.DataFrame([
@@ -168,11 +166,17 @@ def cleave_sequence(sequence, protease, missed_cleavages=0):
     for i in range(len(fragments)):
         for j in range(i + 1, min(i + 2 + missed_cleavages, len(fragments) + 1)):
             peptides.append("".join(fragments[i:j]))
-    
+
     return peptides
 
-def find_glycopeptides(peptides, full_sequence, glycosylation_type):
+def find_glycopeptides(peptides_df, glycosylation_type):
     """Identifies peptides containing sequons and maps the sites to the full protein sequence."""
+    
+    # Process pandas Dataframe
+    peptides = [pep for sublist in peptides_df["Peptides"].tolist() for pep in sublist]
+    full_sequence = peptides_df["Sequence"].tolist()[0]
+    glycosylation_type = glycosylation_type
+    
     glyco_sequon = re.compile(glycosylation[glycosylation_type])
     glycopeptides = []
     for pep in peptides:
@@ -197,6 +201,9 @@ def calculate_peptide_mass(sequence):
 def predict_hydrophobicity(peptide_sequence):
     """Predicts the hydrophobicity of a peptide sequence using the Kyte-Doolittle scale."""
     
+    if len(peptide_sequence) == 0:
+        return 0.0
+
     # Calculate the average hydrophobicity of the peptide
     total_hydrophobicity = sum(hydrophobicity_values.get(aa, 0) for aa in peptide_sequence)
     average_hydrophobicity = round(total_hydrophobicity / len(peptide_sequence), 5)
@@ -213,6 +220,8 @@ def calculate_pI(peptide_sequence):
     Returns:
         float: Estimated isoelectric point (pI)
     """
+    # peptide sequence to string
+    peptide_sequence = str(peptide_sequence)
 
     # Terminal group pKa values (assuming N-term = 9.6, C-term = 2.3)
     N_term_pKa = 9.6
@@ -259,6 +268,21 @@ def compute_mz(mass, charge):
     proton_mass = 1.007276
     return (mass + (charge * proton_mass)) / charge
 
+# experimental glycopeptide hydrophobicity calculation
+def compute_hf_experimental(peptide_hydrophobicity, glycan, hf_weight=10, rt_scale=60):
+    """Compute HF_experimental and scaled retention time (rt_HF_experimental) values."""
+    glycan_hydrophobicity = default_glycan_hydrophobicity.get(glycan, None)
+    
+    # Compute HF_experimental and scaled retention time (rt_HF_experimental) values
+    if glycan_hydrophobicity is not None:
+        hf_experimental = peptide_hydrophobicity + glycan_hydrophobicity * hf_weight
+        rt_hf_experimental = (glycan_hydrophobicity * hf_weight + 1) * (rt_scale / 2)
+    else:
+        hf_experimental = ""
+        rt_hf_experimental = ""
+    
+    return round(hf_experimental, 5), rt_hf_experimental
+
 def process_glycopeptides(peptide_file, glycans, max_charge):
     """Generate glycopeptides and compute m/z values."""
     # Load peptide and glycan data
@@ -281,21 +305,6 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
 
             # Compute m/z values for charge states from 2 to max_charge
             mz_values = {f'z{z}': compute_mz(glycopeptide_mass, z) for z in range(2, max_charge + 1)}
-
-            # Compute HF_w (weight of the glycan HF) -- EXPERIMENTAL
-            # HF_w = 10
-
-            # Compute HF_experimental values
-            # if gly['converted_glycan'] in default_glycan_hydrophobicity:
-            #     HF_experimental = pep['Hydrophobicity'] + default_glycan_hydrophobicity[gly['converted_glycan']] * HF_w
-            # else:
-            #     HF_experimental = ""
-            
-            # Set retension time scale (default 0-60)
-            #rt_scale = 60
-
-            # Scale the HF_experimental value between 0 and 60
-            #rt_HF_experimental = (default_glycan_hydrophobicity[gly['converted_glycan']] * HF_w + 1) * (rt_scale / 2)
 
             # Create a dictionary with the results
             result = {
@@ -323,9 +332,8 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
                 #'ProteinEvidence': pep['ProteinEvidence'],
                 #'SequenceVersion': pep['SequenceVersion'],
                 **mz_values, # z charge states values
-                #'HF_experimental': round(HF_experimental, 5),
-                #'rt_HF_experimental': rt_HF_experimental 
             }
+
             results.append(result)
     
     return pd.DataFrame(results)
@@ -373,39 +381,22 @@ def process_fasta(file, protease, missed_cleavages, glycosylation_type):
         peptides = cleave_sequence(sequence, protease, missed_cleavages)
         logging.info(f"Found {len(peptides)} peptides after {protease} cleavage. The peptides were: {peptides}")
         
-        # Find glycopeptides
-        x_glycopeptides = find_glycopeptides(peptides, sequence, glycosylation_type)
-        logging.info(f"Found {len(x_glycopeptides)} {glycosylation_type}-glycopeptides. The glycopeptides were: {x_glycopeptides}")
-        
-        # Process each glycopeptide
-        for peptide, site in x_glycopeptides:
-            mass = calculate_peptide_mass(peptide)
-            hydrophobicity = predict_hydrophobicity(peptide)
-            pI = calculate_pI(peptide)
-            start_pos = sequence.find(peptide) + 1  # 1-based indexing
-            end_pos = start_pos + len(peptide)
-            results.append({
-                "ProteinID": protein_id,
-                "Site": site,
-                "Peptide": peptide,
-                "Start": start_pos,
-                "End": end_pos,
-                "Length": len(peptide),
-                "Sequon": sequence[site - 1:site + 3], # Extract the sequon amino acid sequence + 1 flanking residue
-                "PredictedMass": mass,
-                "Hydrophobicity": hydrophobicity,
-                "pI": pI,
-                "Protease": protease,
-                "GlycosylationType": glycosylation_type,
-                "MissedCleavages": missed_cleavages,
-                #"Species": os_value, # Uncomment to include 
-                #"TaxonID": ox_value,
-                #"GeneName": gn_value,
-                #"ProteinEvidence": pe_value,
-                #"SequenceVersion": sv_value
-            })
+        # Write protein, peptide and data above list of string results to a pandas DataFrame
+        results.append({
+            "ProteinID": protein_id,
+            "Peptides": peptides,
+            "Sequence": sequence,
+            "Protease": protease,
+            "MissedCleavages": missed_cleavages,
+            "GlycosylationType": glycosylation_type,
+            "Species": os_value,
+            "TaxonID": ox_value,
+            "GeneName": gn_value,
+            "ProteinEvidence": pe_value,
+            "SequenceVersion": sv_value
+        })
 
-    return results
+    return pd.DataFrame(results)
 
 # Add this function to write the results to a CSV file
 def write_csv(output_file, data):
@@ -417,6 +408,9 @@ def write_csv(output_file, data):
 
 # Add this to the main function to set up logging
 def main():
+    
+    # SETUP ARGUMENT PARSER
+    
     parser = argparse.ArgumentParser(description="Glycopeptide Finder")
     parser.add_argument("-i", "--input", required=True, help="Input FASTA file. Can be found in the test_proteomes folder.")
     parser.add_argument("-g", "--glycosylation", default="N", help="Glycosylation type (N, O, or C). Default is N. Large file sizes may result from selecting O or C.")
@@ -464,9 +458,13 @@ def main():
     else:
         glycans = pd.read_csv(glycan_library)
 
-    # Ensure the output directory exists
+    # Ensure the output directory exists (digested_glycopeptide_library)
     output_dir = "digested_glycopeptide_library"
     os.makedirs(output_dir, exist_ok=True)
+
+    # Ensure the output directory exists (digested_peptide_library)
+    peptide_output_dir = "digested_peptide_library"
+    os.makedirs(peptide_output_dir, exist_ok=True)
 
     # Extract the base filename without any directory path
     base_filename = os.path.basename(base_filename)
@@ -484,6 +482,8 @@ def main():
             logging.error(f"Protease {args.protease} is not supported. Supported proteases: {', '.join(proteases.keys())}")
         return
 
+    # WORKFLOW STARTS HERE
+
     # Process the input file with the selected protease(s)
     for protease in selected_proteases:
         
@@ -492,17 +492,94 @@ def main():
         if args.log:
             logging.info(f"Processing {input_file} with protease {protease} and {missed_cleavages} missed cleavages...")
         
-        # Process the input file
-        results = process_fasta(input_file, protease, missed_cleavages, glycosylation_type)
+        # Process the input file and return pandas DataFrame
+        results_df = process_fasta(input_file, protease, missed_cleavages, glycosylation_type)
+        #print(results_df)
+
+        # Flatten results_df to extract peptides
+        digest_peptide_library = pd.DataFrame([pep for sublist in results_df["Peptides"].tolist() for pep in sublist])
         
+        # Set name of first column to "Peptide"
+        digest_peptide_library.columns = ["Peptide"]
+
+        # Add other columns to the DataFrame
+        digest_peptide_library["ProteinID"] = results_df["ProteinID"].tolist()[0]
+        #digest_peptide_library["Protease"] = protease
+        #digest_peptide_library["MissedCleavages"] = missed_cleavages
+        #digest_peptide_library["Species"] = results_df["Species"].tolist()[0]
+        #digest_peptide_library["TaxonID"] = results_df["TaxonID"].tolist()[0]
+        #digest_peptide_library["GeneName"] = results_df["GeneName"].tolist()[0]
+        #digest_peptide_library["ProteinEvidence"] = results_df["ProteinEvidence"].tolist()[0]
+        #digest_peptide_library["SequenceVersion"] = results_df["SequenceVersion"].tolist()[0]
+
+        # Remove duplicate peptide entries in digest_peptide_library
+        digest_peptide_library = digest_peptide_library.drop_duplicates(subset=["Peptide"])
+
+        # Remove empty peptide entries in digest_peptide_library
+        digest_peptide_library = digest_peptide_library[digest_peptide_library["Peptide"].str.strip().astype(bool)]
+
+        # Compute peptide mass, hydrophobicity, pI, and m/z values per row
+        digest_peptide_library["PredictedMass"] = digest_peptide_library["Peptide"].apply(calculate_peptide_mass)
+        digest_peptide_library["Hydrophobicity"] = digest_peptide_library["Peptide"].apply(predict_hydrophobicity)
+        digest_peptide_library["pI"] = digest_peptide_library["Peptide"].apply(calculate_pI)
+        digest_peptide_library["PredictedMass"] = pd.to_numeric(digest_peptide_library["PredictedMass"], errors='coerce')
+        digest_peptide_library = digest_peptide_library.dropna(subset=["PredictedMass"])
+        digest_peptide_library["z1"] = digest_peptide_library["PredictedMass"].apply(lambda mass: compute_mz(mass, 1)) # charge state = 1
+
+        # Write results_df to a CSV file in peptide_library folder
+        digest_peptide_library.to_csv(f"{peptide_output_dir}/{base_filename}_{protease}_digested_mc{missed_cleavages}_peptides.csv", index=False)
+
+        # Extract the protein sequence
+        all_glycopeptides = []
+        for _, row in results_df.iterrows():
+            protein_id = row["ProteinID"]
+            sequence = row["Sequence"]
+
+            # Find glycopeptides
+            x_glycopeptides = find_glycopeptides(pd.DataFrame([row]), glycosylation_type)
+            
+            # Process each glycopeptide
+            for peptide, site in x_glycopeptides:
+                mass = calculate_peptide_mass(peptide)
+                hydrophobicity = predict_hydrophobicity(peptide)
+                pI = calculate_pI(peptide)
+                start_pos = sequence.find(peptide) + 1  # 1-based indexing
+                end_pos = start_pos + len(peptide) - 1
+                all_glycopeptides.append({
+                    "ProteinID": protein_id,
+                    "Site": site,
+                    "Peptide": peptide,
+                    "Start": start_pos,
+                    "End": end_pos,
+                    "Length": len(peptide),
+                    "Sequon": sequence[site - 1:site + 2], # Extract the sequon amino acid sequence + 1 flanking residue
+                    "PredictedMass": mass,
+                    "Hydrophobicity": hydrophobicity,
+                    "pI": pI,
+                    #"Protease": protease,
+                    #"GlycosylationType": glycosylation_type,
+                    #"MissedCleavages": missed_cleavages,
+                    #"Species": row["Species"], # Uncomment to include 
+                    #"TaxonID": row["TaxonID"],
+                    #"GeneName": row["GeneName"],
+                    #"ProteinEvidence": row["ProteinEvidence"],
+                    #"SequenceVersion": row["SequenceVersion"]
+                })
+
+        # Concatenate the results to the main DataFrame
+        results_df = pd.concat([results_df, pd.DataFrame(all_glycopeptides)], ignore_index=True)
+
         # Log the completion of the process
-        all_results.extend(results)
+        all_results.extend(results_df.to_dict(orient='records'))
         if args.verbose:
-            print(f"Processed {len(results)} peptides for protease {protease}.")
+            print(f"Processed {len(results_df)} peptides for protease {protease}.")
         
         # Write the results to a new CSV file
         output_file = args.output or f"{output_dir}/{base_filename}_{protease}_digested_mc{missed_cleavages}_z{charge_state}_{glycosylation_type}-glycopeptides.csv"
-        write_csv(output_file, all_results)
+        
+        # Filter out unwanted fields before writing to CSV
+        filtered_results = [{k: v for k, v in result.items() if k in ["ProteinID", "Site", "Peptide", "Start", "End", "Length", "Sequon", "PredictedMass", "Hydrophobicity", "pI", "Protease", "GlycosylationType", "MissedCleavages", "Species", "TaxonID", "GeneName", "ProteinEvidence", "SequenceVersion"]} for result in all_results]
+        write_csv(output_file, filtered_results)
         #print(f"Results written to {output_file}. Processing complete.")
 
         # Log the completion of the process
