@@ -53,26 +53,20 @@ echo "$ascii_glycopeptide1"
 echo "Starting glycopeptide sequence finder..."
 echo "Please wait while the glycopeptide sequence finder is running..."
 echo "LETS GET READY TO FIND SOME GLYCOPEPTIDE SEQUENCES!!!"
-sleep 1
 echo "Wasting time... loading peptides... loading glycans... loading glycopeptides... testing user's patience..."
-sleep 1
 echo "Glycopeptide sequence finder is running... maybe... I think... I hope... I'm not sure... I'm just a computer... "
 echo "I don't know what I'm doing... I'm just finding... Must find glycopeptides. Must find glycopeptides. Must find glycopeptides."
-sleep 1
 echo "Stay tuned! We are preparing the ultimate glycopeptide discovery mission!"
-sleep 1
 echo "Running super advanced algorithms... in the background... somewhere... probably..."
 echo "💀 ERROR: WHOA, BRO! Glycosylation type 'X' just crashed the party! ❌"
 echo "What are you even doing? Only 'N', 'O', or 'C' are allowed in this twisted code dimension! 🔥"
 echo "Check yourself before you wreck yourself—fix it ASAP, or this thing's gonna get REAL weird. 🤖💥"
 echo "💀 DEBUG: LOOKING FOR GLYCOSYLATION TYPES... N, O, C ONLY... X? BRUHHHHHH!"
-sleep 1
 echo "Don't panic, I'm sure we'll find those glycopeptides. Or maybe not. I'm just a computer after all."
-sleep 3
 echo "LET'S GO ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 sleep 1
 echo "Ope! Here I got glycopeptiding again! 🤣"
-sleep 3
+sleep 1
 echo "WARNING: CPU TEMP THRESHOLD EXCEEDED! 🔥"
 echo ""
 echo "Traceback (most recent call last):"
@@ -147,13 +141,10 @@ sleep 2
 
 # print the number of peptide sequences found
 echo "The number of $protease digested peptide sequences found is: $peptide_count."
-sleep 1
 echo "Wow! That is a LOT of peptides, buddy! You really know how to slice and dice! 😎🍴"
-sleep 1
 # print the number of glycopeptide sequences found
 echo "The number of $glycosylation_type-glycopeptide sequences found is: $glycopeptide_count. Great job, Glycoscientist! You've done it again!"
 echo "Wow! That is a TON of glycopeptides! You are officially the Glycoprotein Master. 🏆"
-sleep 1
 echo "You are a glycopeptide finding MACHINE! Keep up the epic work, my friend! 💪🚀"
 echo "Glycopeptide sequence finder has finished.  🎉"
 echo "But... Wait! Please feed me more proteome data! I'm hungry for more glycopeptides! 🍽️ Bring on the next batch!"

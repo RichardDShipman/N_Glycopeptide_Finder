@@ -12,4 +12,10 @@ else
     echo "digested_glycopeptide_library: No such file or directory. It has already been deleted."
 fi
 
+if [ -d "mock_mass_spectra" ]; then
+    rm -r mock_mass_spectra
+else
+    echo "mock_mass_spectra: No such file or directory. It has already been deleted."
+fi
+
 echo "Digest libraries have been deleted. Have a Fantastic Day!"

@@ -100,9 +100,10 @@ default_n_glycan_library = pd.DataFrame([
     #{"glytoucan_ac": "G58087IP", "byonic": "HexNAc(2)Hex(11) % 2188.739804", "composition": "HexNAc(2)Hex(11)", "mass": 2188.739804, "shorthand_glycan": "N2H11"}, # N2H11
     #{"glytoucan_ac": "G83460ZZ", "byonic": "HexNAc(2)Hex(10) % 2026.686980", "composition": "HexNAc(2)Hex(10)", "mass": 2026.686980, "shorthand_glycan": "N2H10"}, # N2H10
     #{"glytoucan_ac": "G80920RR", "byonic": "HexNAc(2)Hex(9) % 1864.634157", "composition": "HexNAc(2)Hex(9)", "mass": 1864.634157, "shorthand_glycan": "N2H9"}, # N2H9
-    {"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333, "shorthand_glycan": "N2H8"}, # N2H8
+    {"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333, "shorthand_glycan": "N2H8"}, # N2H8 -- High Mannose
     #{"glytoucan_ac": "G31852PQ", "byonic": "HexNAc(2)Hex(7) % 1540.528510", "composition": "HexNAc(2)Hex(7)", "mass": 1540.528510, "shorthand_glycan": "N2H7"}, # N2H7
     #{"glytoucan_ac": "G41247ZX", "byonic": "HexNAc(2)Hex(6) % 1378.475686", "composition": "HexNAc(2)Hex(6)", "mass": 1378.475686, "shorthand_glycan": "N2H6"}, # N2H6
+    #{"glytoucan_ac": "G36670VW", "byonic": "HexNAc(5)Hex(5)dHex(1)NeuAc(2) % 2553.909723", "composition": "HexNAc(5)Hex(5)dHex(1)NeuAc(2)", "mass": 2553.909723, "shorthand_glycan": "N5H5F1S2"}  # N5H5F1S2 -- # Complex - Fucosylation, Sialylated
 ])
 
 # Define default O-glycan mass library as a DataFrame (O-GalNAc Glycans) Using most common O-glycans as default, HexNac(1) with no stereochemistry
@@ -401,31 +402,29 @@ def process_fasta(file, protease, missed_cleavages, glycosylation_type):
 
     return pd.DataFrame(results)
 
-# Function to Calculate glycopeptide ion series m/z values
+# Experimental Work in Progress for N-Glycans
+# Function to Calculate glycopeptide ion series m/z values  
 def calculate_n_glycopeptide_ions(peptide, glycan_composition, glycan_frag_order=None, charge=1):
     """
-    Calculate theoretical m/z values for b, y, Y, B, oxonium ions, and sugar chunks of a glycopeptide.
-    
+    Calculate theoretical m/z values for b, y, Y, B, and oxonium ions for an N-glycopeptide.
+
     Parameters:
       peptide (str): The peptide sequence (e.g., "NTSK").
-      glycan_composition (str): A string representing the glycan composition, e.g., "HexNAc(2)Hex(8)".
-      glycan_frag_order (list, optional): A list specifying the order of sugar losses.
-                                          If provided, it is used to simulate sequential 
-                                          loss for Y and B ion series and to generate sugar chunks.
+      glycan_composition (str): A string like "HexNAc(5)Hex(5)dHex(1)NeuAc(2)".
+      glycan_frag_order (list, optional): A list specifying the sugar loss order.
       charge (int): The charge state (default is 1).
-      
+
     Returns:
-      dict: A dictionary with keys 'b', 'y', 'Y', 'B', 'oxonium', and 'chunks' containing
-            the calculated m/z values.
+      dict: A dictionary with 'b', 'y', 'Y', 'B', 'oxonium' ions and their m/z values.
     """
-    # Constants (monoisotopic masses in Da)
+    # Constants
     proton = 1.007276
     water  = 18.010565
 
-    # Compute the neutral mass of the peptide (include water for the full peptide mass)
+    # Compute the neutral mass of the peptide
     peptide_mass = sum(amino_acid_masses[aa] for aa in peptide) + water
 
-    # Parse glycan composition string into a dictionary
+    # Parse glycan composition into a dictionary
     glycan_dict = {}
     for part in glycan_composition.split(')'):
         if part:
@@ -435,83 +434,149 @@ def calculate_n_glycopeptide_ions(peptide, glycan_composition, glycan_frag_order
     # --- Calculate b ions ---
     b_ions = []
     cumulative = 0.0
-    # b ions: cumulative from the N-terminus (excluding the full peptide)
     for i in range(len(peptide) - 1):
         cumulative += amino_acid_masses[peptide[i]]
-        b_val = cumulative + proton  # b ion mass = sum + proton
-        b_ions.append(round(b_val / charge, 4))
-    
+        b_ions.append(round((cumulative + proton) / charge, 4))
+
     # --- Calculate y ions ---
     y_ions = []
     cumulative = 0.0
-    # y ions: cumulative from the C-terminus (excluding the full peptide)
     for i in range(len(peptide) - 1, 0, -1):
         cumulative += amino_acid_masses[peptide[i]]
-        y_val = cumulative + water + proton  # y ion mass = sum + water + proton
-        y_ions.insert(0, round(y_val / charge, 4))
-    
+        y_ions.insert(0, round((cumulative + water + proton) / charge, 4))
+
     # --- Glycan Calculations ---
     glycan_total_mass = sum(monosaccharide_library[sugar]['mass'] * count for sugar, count in glycan_dict.items())
     intact_glycopeptide_mass = peptide_mass + glycan_total_mass
 
-    # --- Calculate Y ions (peptide + residual glycan fragment) ---
+    # --- Calculate Y ions ---
     Y_ions = {}
+    current_mass = peptide_mass  # Start with peptide alone
+    Y_ions['Y0'] = round((current_mass + proton) / charge, 4)  # Y0 = peptide only
+
+    y_counter = 1  # Begin numbering Y ions
+
+    # First, add HexNAc(1) and HexNAc(2)
+    if 'HexNAc' in glycan_dict and glycan_dict['HexNAc'] >= 1:
+        current_mass += monosaccharide_library['HexNAc']['mass']
+        Y_ions[f'Y{y_counter}'] = round((current_mass + proton) / charge, 4)
+        y_counter += 1
+
+    if 'HexNAc' in glycan_dict and glycan_dict['HexNAc'] >= 2:
+        current_mass += monosaccharide_library['HexNAc']['mass']
+        Y_ions[f'Y{y_counter}'] = round((current_mass + proton) / charge, 4)
+        y_counter += 1
+
+    # Add remaining glycan fragments
+    remaining_sugars = []
+    for sugar, count in glycan_dict.items():
+        if sugar == 'HexNAc':  # Skip first two already added
+            count -= 2
+        remaining_sugars.extend([sugar] * count)
+
+    # Follow glycan_frag_order if provided, otherwise use default order
     if glycan_frag_order:
-        current_mass = intact_glycopeptide_mass
-        Y_ions['Y0'] = round((current_mass + proton) / charge, 4)
-        for i, sugar in enumerate(glycan_frag_order, start=1):
-            current_mass -= monosaccharide_library[sugar]['mass']
-            Y_ions[f'Y{i}'] = round((current_mass + proton) / charge, 4)
+        ordered_sugars = glycan_frag_order
     else:
-        # Default approach for many N-glycopeptides:
-        Y_ions['Y0'] = round((peptide_mass + proton) / charge, 4)
-        if glycan_dict.get('HexNAc', 0) > 0:
-            Y_ions['Y1'] = round((peptide_mass + monosaccharide_library['HexNAc']['mass'] + proton) / charge, 4)
-        if glycan_dict.get('HexNAc', 0) > 1:
-            Y_ions['Y2'] = round((peptide_mass + 2 * monosaccharide_library['HexNAc']['mass'] + proton) / charge, 4)
-    
-    # # --- Calculate B ions (glycan fragment ions) ---
-    # B_ions = {}
-    # if glycan_frag_order:
-    #     cumulative = 0.0
-    #     for i, sugar in enumerate(glycan_frag_order, start=1):
-    #         cumulative += monosaccharide_library[sugar]['mass']
-    #         B_ions[f'B{i}'] = round((cumulative + proton) / charge, 4)
-    # else:
-    #     # Report common oxonium ions as B ions if no fragmentation order is given.
-    #     if glycan_dict.get('HexNAc', 0) > 0:
-    #         B_ions['B_HexNAc'] = round((monosaccharide_library['HexNAc']['mass'] + proton) / charge, 4)
-    #     if glycan_dict.get('Hex', 0) > 0:
-    #         B_ions['B_Hex'] = round((monosaccharide_library['Hex']['mass'] + proton) / charge, 4)
-    
-    # # --- Calculate Oxonium ions ---
-    # # These are common low–m/z ions originating from individual sugar units.
-    # oxonium_ions = {}
-    # for sugar, count in glycan_dict.items():
-    #     if count > 0:
-    #         oxonium_ions[f'ox_{sugar}'] = round(monosaccharide_library[sugar]['mass'] + proton, 4)
-    
-    # --- Calculate Sugar Chunks (contiguous groups of sugars) ---
-    # This simulates the possibility that multiple sugars break off together.
-    # sugar_chunks = {}
-    # if glycan_frag_order:
-    #     n = len(glycan_frag_order)
-    #     # Enumerate all contiguous subsequences (chunks)
-    #     for i in range(n):
-    #         for j in range(i, n):
-    #             chunk_label = f"chunk_{i+1}-{j+1}"
-    #             chunk_mass = sum(monosaccharide_library[sugar]['mass'] for sugar in glycan_frag_order[i:j+1])
-    #             # Adding a proton to simulate a charged fragment
-    #             sugar_chunks[chunk_label] = round((chunk_mass + proton) / charge, 4)
+        ordered_sugars = remaining_sugars
+
+    # Sequentially add the remaining glycans
+    for sugar in ordered_sugars:
+        current_mass += monosaccharide_library[sugar]['mass']
+        Y_ions[f'Y{y_counter}'] = round((current_mass + proton) / charge, 4)
+        y_counter += 1
+
+    # --- Calculate B ions ---
+    B_ions = {}
+    cumulative = 0.0
+
+    if glycan_frag_order:
+        # Separate HexNAc from other glycans
+        other_glycans = [sugar for sugar in glycan_frag_order if 'HexNAc' not in sugar]
+        hexnac_glycans = [sugar for sugar in glycan_frag_order if 'HexNAc' in sugar]
+
+        # Combine the orders so that HexNAc comes last
+        glycan_frag_order = other_glycans + hexnac_glycans
+
+        # Iterate through the reordered glycan list
+        for i, sugar in enumerate(glycan_frag_order, start=1):
+            cumulative += monosaccharide_library[sugar]['mass']
+            B_ions[f'B{i}'] = round((cumulative + proton) / charge, 4)
+    else:
+        # If no glycan frag order is provided, handle the glycan composition
+        for sugar, count in glycan_dict.items():
+            for i in range(count):
+                cumulative += monosaccharide_library[sugar]['mass']
+                B_ions[f'B_{sugar}_{i+1}'] = round((cumulative + proton) / charge, 4)
+
+
+
+    # --- Calculate Oxonium ions ---
+    oxonium_ions = {}
+    for sugar, count in glycan_dict.items():
+        if count > 0:
+            oxonium_ions[f'ox_{sugar}'] = round(monosaccharide_library[sugar]['mass'] + proton, 4)
 
     return {
         'b': b_ions,
         'y': y_ions,
-        'Y': Y_ions,
-        #'B': B_ions,
-        #'oxonium': oxonium_ions,
-        #'chunks': sugar_chunks
+        'Y': dict(sorted(Y_ions.items(), key=lambda item: item[1])),  # Sort by mass
+        'B': B_ions,
+        'oxonium': oxonium_ions,
     }
+
+## Experimental -- testing
+#from itertools import permutations
+def generate_all_y_ions(peptide, glycan_composition, charge=1):
+    """
+    Generate all possible Y ion series considering different fragmentation paths.
+
+    Parameters:
+      peptide (str): Peptide sequence (e.g., "NTSK").
+      glycan_composition (str): Glycan composition string (e.g., "HexNAc(5)Hex(5)dHex(1)NeuAc(2)").
+      charge (int): The charge state (default is 1).
+
+    Returns:
+      dict: A dictionary where keys are fragmentation paths and values are Y ion series.
+    """
+    # Constants
+    proton = 1.007276
+    water  = 18.010565
+
+    # Compute the neutral mass of the peptide
+    peptide_mass = sum(amino_acid_masses[aa] for aa in peptide) + water
+
+    # Parse glycan composition
+    glycan_dict = {}
+    for part in glycan_composition.split(')'):
+        if part:
+            sugar, count = part.split('(')
+            glycan_dict[sugar] = int(count)
+
+    # Convert glycan composition into a list of sugars
+    glycan_list = []
+    for sugar, count in glycan_dict.items():
+        glycan_list.extend([sugar] * count)  # Expand each sugar into individual occurrences
+
+    # Generate all possible fragmentation paths
+    unique_permutations = set(permutations(glycan_list))  # Unique orders only
+
+    # Compute Y ions for each fragmentation path
+    all_Y_ions = {}
+
+    for perm in unique_permutations:
+        path_name = " -> ".join(perm)  # Name this path
+
+        current_mass = peptide_mass  # Start with peptide only
+        y_series = {'Y0': round((current_mass + proton) / charge, 4)}
+
+        for i, sugar in enumerate(perm, start=1):
+            current_mass += monosaccharide_library[sugar]['mass']
+            y_series[f'Y{i}'] = round((current_mass + proton) / charge, 4)
+
+        all_Y_ions[path_name] = y_series
+
+    return all_Y_ions
 
 # Add this function to write the results to a CSV file
 def write_csv(output_file, data):
@@ -623,12 +688,12 @@ def main():
         #digest_peptide_library["MissedCleavages"] = missed_cleavages
         #digest_peptide_library["Species"] = results_df["Species"].tolist()[0]
         #digest_peptide_library["TaxonID"] = results_df["TaxonID"].tolist()[0]
-        digest_peptide_library["GeneName"] = results_df["GeneName"].tolist()[0]
+        #digest_peptide_library["GeneName"] = results_df["GeneName"].tolist()[0]
         #digest_peptide_library["ProteinEvidence"] = results_df["ProteinEvidence"].tolist()[0]
         #digest_peptide_library["SequenceVersion"] = results_df["SequenceVersion"].tolist()[0]
 
-        # Remove duplicate peptide entries in digest_peptide_library
-        digest_peptide_library = digest_peptide_library.drop_duplicates(subset=["Peptide"])
+        # Remove duplicate peptide entries in digest_peptide_library (No, Proteomic Parsimony)
+        #digest_peptide_library = digest_peptide_library.drop_duplicates(subset=["Peptide"])
 
         # Remove empty peptide entries in digest_peptide_library
         digest_peptide_library = digest_peptide_library[digest_peptide_library["Peptide"].str.strip().astype(bool)]
@@ -639,7 +704,7 @@ def main():
         digest_peptide_library["pI"] = digest_peptide_library["Peptide"].apply(calculate_pI)
         digest_peptide_library["PredictedMass"] = pd.to_numeric(digest_peptide_library["PredictedMass"], errors='coerce')
         digest_peptide_library = digest_peptide_library.dropna(subset=["PredictedMass"])
-        digest_peptide_library["z1"] = digest_peptide_library["PredictedMass"].apply(lambda mass: compute_mz(mass, 1)) # charge state = 1
+        #digest_peptide_library["z1"] = digest_peptide_library["PredictedMass"].apply(lambda mass: compute_mz(mass, 1)) # charge state = 1
 
         # Write results_df to a CSV file in peptide_library folder
         digest_peptide_library.to_csv(f"{peptide_output_dir}/{base_filename}_{protease}_digested_mc{missed_cleavages}_peptides.csv", index=False)
