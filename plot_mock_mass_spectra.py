@@ -81,7 +81,7 @@ def create_mass_spectrum_plot(df, color_mapping, title):
         'y': 20,   # y ions
         'Y': 60,   # Y ions
         'B': 40,   # B ions
-        'oxonium': 70  # Oxonium ions (this is the threshold for fixed height)
+        'oxonium': 70  # Oxonium ions (fixed height)
     }
 
     # Store legend handles
@@ -91,23 +91,23 @@ def create_mass_spectrum_plot(df, color_mapping, title):
     for _, row in df.iterrows():
         ion_series = row['IonSeries']
 
-        # Flag to track if oxonium ions have been processed
-        oxonium_reached = False
+        # Check if oxonium ions exist in the ion series
+        oxonium_reached = 'oxonium' in ion_series
 
         for ion_type, values in ion_series.items():
             if isinstance(values, list):  # For b and y ions
+                total_length = len(values)  # Define dynamically
+
                 for i, mz in enumerate(values, start=0):
                     if ion_type == 'b':
-                       ion_number = i + 1  # Normal numbering for b ions
+                        ion_number = i + 1  # Normal numbering for b ions
                     elif ion_type == 'y':
-                       ion_number = i + 1  #  numbering for y ions
+                        ion_number = total_length - i  # Reverse numbering for y ions
+
                     label = f"{ion_type}{ion_number}"
 
-                    # Check if oxonium has been reached
-                    if ion_type.lower() == 'oxonium' or oxonium_reached:
-                        oxonium_reached = True
-                    else:
-                        line_length = ion_length_map.get(ion_type, 100)  # Variable height for other ions
+                    # Determine line length
+                    line_length = ion_length_map.get(ion_type, 50)  # Default to 50 for unknown ions
 
                     color = color_mapping.get(ion_type, "black")
                     ax.vlines(mz, 0, line_length, color=color, lw=2)
@@ -122,12 +122,8 @@ def create_mass_spectrum_plot(df, color_mapping, title):
 
             elif isinstance(values, dict):  # For Y, B, and oxonium ions
                 for ion_name, mz in values.items():
-                    # Check if oxonium has been reached
-                    if ion_type.lower() == 'oxonium' or oxonium_reached:
-                        line_length = 70  # Fixed height for oxonium and beyond
-                        oxonium_reached = True
-                    else:
-                        line_length = ion_length_map.get(ion_type, 100)  # Variable height for other ions
+                    # Fixed height for oxonium ions
+                    line_length = ion_length_map.get(ion_type, 50)
 
                     color = color_mapping.get(ion_type, "black")
                     ax.vlines(mz, 0, line_length, color=color, lw=2)
@@ -143,7 +139,7 @@ def create_mass_spectrum_plot(df, color_mapping, title):
     # Add the legend
     ax.legend(handles=legend_handles, title="Ion Types", loc="upper right", fontsize=8)
 
-    ax.set_xlabel("Calulcated m/z values (Da)")
+    ax.set_xlabel("Calculated m/z values (Da)")
     ax.set_ylabel("Intensity (%) (Mock values)")
     ax.set_title(title)
     ax.set_ylim(0, 100)  # Adjust based on the plot
