@@ -230,7 +230,7 @@ def main():
       site = int(site)
     
     # Create descriptive title with metadata
-    title = f"Glycopeptide Sequence Finder: Mock Glycopeptide Mass Spectrum (HCD: b, y ions / ETD: c, z ions)\nProtein Identifer: {protein} - Glycopeptide Mass: {glycopeptide_mass}\nSite: {site} Peptide: {peptide_sequence} Peptide Mass: {peptide_mass}\nGlycan Composition: {glycan_composition}, GlyToucan: {glytoucan_ac}, Glycan Mass: {glycan_mass}"
+    title = f"Glycopeptide Sequence Finder: Mock Glycopeptide Mass Spectrum (HCD: b, y ions / ETD: c, z ions)\nProtein Identifer: {protein}, Glycopeptide Mass: {glycopeptide_mass}\nSite: {site}, Peptide: {peptide_sequence}, Peptide Mass: {peptide_mass}\nGlycan Composition: {glycan_composition}, GlyToucan: {glytoucan_ac}, Glycan Mass: {glycan_mass}"
     
     # Create unique output filename for each row using metadata
     output_file = os.path.join(output_dir, f"{protein}_{site}_{peptide_sequence}_{glytoucan_ac}_mock_mass_spectrum.png").replace('|', '_') # safe file name

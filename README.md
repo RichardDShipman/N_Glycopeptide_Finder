@@ -6,7 +6,7 @@
 
 Welcome to the Glycopeptide Sequence Finder!
 
-![MockMassSpectrumOfAN-GlycopeptideFromAPig!](mock_mass_spectra/sp_P09571_TRFE_PIG_25_ENMSK_G62765YT_mock_mass_spectrum.png)
+![MockMassSpectrumOfAN-GlycopeptideFromAPig!](mock_mass_spectra/sp_P01042_KNG1_HUMAN_205_ITYSIVQTNCSK_G62765YT_mock_mass_spectrum.png)
 
 *Example above*: Calculated mass spectrum for glycopeptide Serotransferrin (P09571) TRFE_PIG - ENMSK - 25 - G62765YT - HexNAc(2)Hex(8) created `plot_mock_mass_spectra.py`. Note: This is a basic N-glycan structure fragment under are minimum sequential fragmentation of Hex(8) down to HexHAc(2) core N-glycan.
 
@@ -457,6 +457,10 @@ Cock, P. J., Antao, T., Chang, J. T., Chapman, B. A., Cox, C. J., Dalke, A., …
 Goloborodko, A.A.; Levitsky, L.I.; Ivanov, M.V.; and Gorshkov, M.V. (2013) “Pyteomics - a Python Framework for Exploratory Data Analysis and Rapid Software Prototyping in Proteomics”, Journal of The American Society for Mass Spectrometry, 24(2), 301–304. DOI: 10.1007/s13361-012-0516-6
 
 Levitsky, L.I.; Klein, J.; Ivanov, M.V.; and Gorshkov, M.V. (2018) “Pyteomics 4.0: five years of development of a Python proteomics framework”, Journal of Proteome Research. DOI: 10.1021/acs.jproteome.8b00717
+
+- Multicenter Longitudinal Quality Assessment of MS-Based Proteomics in Plasma and Serum.
+
+Kardell, Oliver, Thomas Gronauer, Christine von Toerne, Juliane Merl-Pham, Ann-Christine König, Teresa K. Barth, Julia Mergner, et al. “Multicenter Longitudinal Quality Assessment of MS-Based Proteomics in Plasma and Serum.” Journal of Proteome Research, February 7, 2025. https://doi.org/10.1021/acs.jproteome.4c00644.
 
 - GlyGen: Computational and Informatics Resources for Glycoscience.
 
