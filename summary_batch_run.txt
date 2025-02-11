@@ -16,29 +16,29 @@ After some finding and searching for glycopeptides in input protein/proteome FAS
 Total Peptide Sequences Found:  5840570
 Peptides generated using trypsin digestion with 0 missed cleavages.
 You really know how to slice and dice those peptides! 😎🍴
-Total Glycopeptide Sequences Found:   318562
+Total Glycopeptide Sequences Found:   200935
 You've discovered an impressive number of glycopeptides! Keep it up, Glycoscientist! 🏆
 ---------------------------------------------------------------------------
 After performing an extensive computational search for glycopeptides in the input protein/proteome FASTA dataset, a total of  5840570 peptide sequences were identified in the digested_peptide_library.
 These peptides were generated through trypsin digestion, with 0 to 0 missed cleavages observed during the process.
-Additionally, glycopeptide sequences were detected, yielding a total of   318562 glycopeptides in the digested_glycopeptide_library.
+Additionally, glycopeptide sequences were detected, yielding a total of   200935 glycopeptides in the digested_glycopeptide_library.
 This analysis highlights the successful identification of glycopeptides, which serves as a critical step in the ongoing study of glycoproteomics and the characterization of glycosylation patterns across various proteins.
 The findings provide valuable insight into the glycosylation landscape of the proteome by calculating the mass spectrometry properties of peptides and glycopeptides, laying the groundwork for more advanced analyses in future research.
 ---------------------------------------------------------------------------
 Batch Run Summary:
-Total Elapsed Time: 1.06 minutes
+Total Elapsed Time: 1.36 minutes
 Protease Used: trypsin
 Missed Cleavages: 0
 Glycosylation Type: N-Glycosylation
 Number of Peptide Sequences:  5840570
-Number of N-Glycopeptide Sequences:   318562
+Number of N-Glycopeptide Sequences:   200935
 ---------------------------------------------------------------------------
 Thank you for using the Glycopeptide Sequence Finder! Please come back when you're ready to discover more glycopeptides!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     🔬 F O U N D   G L Y C O P E P T I D E   S E Q U E N C E S ! ! ! 🔬
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━                                   
-    I D E N T I F I E D:   318562 trypsin-digested N-glycopeptide sequences.                                      
+    I D E N T I F I E D:   200935 trypsin-digested N-glycopeptide sequences.                                      
     I D E N T I F I E D:  5840570 trypsin-digested peptide sequences.
         ╭────────────────────────────────────────────╮
                         GLYCO-

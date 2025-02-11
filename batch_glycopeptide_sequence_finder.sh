@@ -1,9 +1,7 @@
 #!/bin/bash
-
 start_time=$(date +%s)
 
 # define parameters
-
 # cores
 cores=4
 
@@ -21,8 +19,9 @@ protease="trypsin"  # Cleaves after K or R unless followed by P
 #protease="proteinase-k"  # Cleaves after A, F, I, L, V, W, Y
 #protease="all" # all proteases
 
-# missed cleavages
+# missed cleavages and max peptide length filter
 missed_cleavages=0
+max_peptide_length=25
 
 # Glycosylation type
 glycosylation_type="N"
@@ -82,7 +81,7 @@ echo "Rebooting finder. Beeep booop. *sounds*"
 
 # Run the glycopeptide sequence finder script
 time ls ${input_dir}/*.fasta | xargs -I {} -P ${cores} python glycopeptide_sequence_finder_cmd.py \
-    -i "{}" -p ${protease} -g ${glycosylation_type} -c ${missed_cleavages} -z ${charge_state} -v 
+    -i "{}" -p ${protease} -g ${glycosylation_type} -c ${missed_cleavages} -z ${charge_state} -m ${max_peptide_length} -v 
 
 echo "Digested and tasted the glycoproteome. Yummy! 🍽️"
 
