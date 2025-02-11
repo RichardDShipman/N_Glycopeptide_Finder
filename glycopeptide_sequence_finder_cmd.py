@@ -659,7 +659,7 @@ def main():
     parser.add_argument("-l", "--log", help="Provide log file name. (suggestion: -l log.txt)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output.")
     parser.add_argument("-z", "--charge", type=int, default=5, help="Maximum charge state (default: 5).")
-    parser.add_argument("-m", "--peptide_max_length", type=int, default=50, help="Max peptide length from digestion(default is 50).")
+    parser.add_argument("-m", "--peptide_max_length", type=int, default=25, help="Max peptide length from digestion(default is 25).")
 
     # Parse arguments
     args = parser.parse_args()
