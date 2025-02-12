@@ -191,7 +191,7 @@ G41247ZX,HexNAc(2)Hex(6) % 1378.475686,HexNAc(2)Hex(6),1378.475686
 
 # Plot Mock Mass Spectrum
 
-![PiggieGlycopeptides](mock_mass_spectra/sp_C0HL13_LRP2_PIG_179_DASDELNCTQR_G62765YT_mock_mass_spectrum.png)
+![PiggieGlycopeptides](mock_mass_spectra/sp_P02763_A1AG1_HUMAN_103_ENGTISR_G62765YT_mock_mass_spectrum.png)
 
 plot_mock_mass_spectra.py
 
