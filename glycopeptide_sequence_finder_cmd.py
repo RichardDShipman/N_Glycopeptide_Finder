@@ -104,6 +104,9 @@ default_n_glycan_library = pd.DataFrame([
     #{"glytoucan_ac": "G31852PQ", "byonic": "HexNAc(2)Hex(7) % 1540.528510", "composition": "HexNAc(2)Hex(7)", "mass": 1540.528510, "shorthand_glycan": "N2H7"}, # N2H7
     #{"glytoucan_ac": "G41247ZX", "byonic": "HexNAc(2)Hex(6) % 1378.475686", "composition": "HexNAc(2)Hex(6)", "mass": 1378.475686, "shorthand_glycan": "N2H6"}, # N2H6
     #{"glytoucan_ac": "G36670VW", "byonic": "HexNAc(5)Hex(5)dHex(1)NeuAc(2) % 2553.909723", "composition": "HexNAc(5)Hex(5)dHex(1)NeuAc(2)", "mass": 2553.909723, "shorthand_glycan": "N5H5F1S2"}  # N5H5F1S2 -- # Complex - Fucosylation, Sialylated
+    #{"glytoucan_ac": "G29068FM", "byonic": "HexNAc(1) % 221.089937305", "composition": "HexNAc(1)", "mass": 221.089937305, "shorthand_glycan": "N1"}, # N1 -- EndoH Treatment HexNAc
+    #{"glytoucan_ac": "G04038LG", "byonic": "HexNAc(1)dHex(1) % 367.147846175", "composition": "HexNAc(1)dHex(1)", "mass": 367.147846175, "shorthand_glycan": "N1F1"}, # N1F1 -- EndoH Treatment HexNAc (Fuc-Core)
+
 ])
 
 # Define default O-glycan mass library as a DataFrame (O-GalNAc Glycans) Using most common O-glycans as default, HexNac(1) with no stereochemistry
