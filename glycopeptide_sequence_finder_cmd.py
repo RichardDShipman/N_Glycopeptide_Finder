@@ -814,7 +814,12 @@ def main():
         
         # Now apply filtering (peptide length less than 50 or set as desired. maybe by users. this saves room too data wise.)
         peptide_max_length = l_input_arg
-        all_glycopeptides = all_glycopeptides.loc[all_glycopeptides['Peptide'].str.len() <= peptide_max_length]
+
+        # Filter out peptides with length greater than the specified maximum length
+        if not all_glycopeptides.empty and 'Peptide' in all_glycopeptides.columns:
+            all_glycopeptides = all_glycopeptides.loc[all_glycopeptides['Peptide'].str.len() <= peptide_max_length]
+        else:
+            print("No glycopeptides found; skipping peptide length filtering.")
 
         # Concatenate the results to the main DataFrame
         results_df = pd.concat([results_df, pd.DataFrame(all_glycopeptides)], ignore_index=True)
@@ -851,8 +856,11 @@ def main():
         # Process glycopeptides and compute m/z values
         glycopeptide_results = process_glycopeptides(output_file, glycans, charge_state)
 
-        # Compute Ion Series
-        glycopeptide_results["IonSeries"] = glycopeptide_results.apply(lambda row: calculate_n_glycopeptide_ions(row["Peptide"], row["Composition"], charge=1), axis=1)
+        # Compute IonSeries for glycopeptides
+        if not glycopeptide_results.empty:
+            glycopeptide_results["IonSeries"] = glycopeptide_results.apply(lambda row: calculate_n_glycopeptide_ions(row["Peptide"], row["Composition"], charge=1), axis=1)
+        else:
+            print("No glycopeptides found; skipping Ion Series computation.")
 
         # Write the results to a new CSV file
         glycopeptide_results.to_csv(glycopeptide_output_file, index=False)

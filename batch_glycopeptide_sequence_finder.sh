@@ -63,7 +63,6 @@ echo "Check yourself before you wreck yourself—fix it ASAP, or this thing's go
 echo "💀 DEBUG: LOOKING FOR GLYCOSYLATION TYPES... N, O, C ONLY... X? BRUHHHHHH!"
 echo "Don't panic, I'm sure we'll find those glycopeptides. Or maybe not. I'm just a computer after all."
 echo "LET'S GO ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-sleep 1
 echo "Ope! Here I got glycopeptiding again! 🤣"
 sleep 1
 echo "WARNING: CPU TEMP THRESHOLD EXCEEDED! 🔥"
@@ -125,7 +124,7 @@ ascii_glycopeptide2="
             H-N-C-C-O--PEPTIDE--N-C-C-O-H-N-C-C-O-H
                     |  SEQUENCE   |         |
                     R   FINDER    R         R
-                   /               \\        \\
+                   /               \\         \\
                   N-Glycan          O-Glycan   C-Glycan
         ╰────────────────────────────────────────────╯
                     ╲
@@ -160,15 +159,7 @@ summary_report="summary_batch_run.txt"
     echo "After some finding and searching for glycopeptides in input protein/proteome FASTA..."
     echo "Total Peptide Sequences Found: $peptide_count"
     echo "Peptides generated using $protease digestion with $missed_cleavages missed cleavages."
-    echo "You really know how to slice and dice those peptides! 😎🍴"
     echo "Total Glycopeptide Sequences Found: $glycopeptide_count"
-    echo "You've discovered an impressive number of glycopeptides! Keep it up, Glycoscientist! 🏆"
-    echo "---------------------------------------------------------------------------"
-    echo "After performing an extensive computational search for glycopeptides in the input protein/proteome FASTA dataset, a total of $peptide_count peptide sequences were identified in the digested_peptide_library."
-    echo "These peptides were generated through $protease digestion, with 0 to $missed_cleavages missed cleavages observed during the process."
-    echo "Additionally, glycopeptide sequences were detected, yielding a total of $glycopeptide_count glycopeptides in the digested_glycopeptide_library."
-    echo "This analysis highlights the successful identification of glycopeptides, which serves as a critical step in the ongoing study of glycoproteomics and the characterization of glycosylation patterns across various proteins."
-    echo "The findings provide valuable insight into the glycosylation landscape of the proteome by calculating the mass spectrometry properties of peptides and glycopeptides, laying the groundwork for more advanced analyses in future research."
     echo "---------------------------------------------------------------------------"
     echo "Batch Run Summary:"
     echo "Total Elapsed Time: $elapsed_time_mins minutes"
@@ -178,8 +169,8 @@ summary_report="summary_batch_run.txt"
     echo "Number of Peptide Sequences: $peptide_count"
     echo "Number of $glycosylation_type-Glycopeptide Sequences: $glycopeptide_count"
     echo "---------------------------------------------------------------------------"
-    echo "Thank you for using the Glycopeptide Sequence Finder! Please come back when you're ready to discover more glycopeptides!"
-    echo "$ascii_glycopeptide2"
+    echo "Thank you for using the Glycopeptide Sequence Finder!" 
+    echo "Please come back when you're ready to discover more glycopeptides!"
     echo "---------------------------------------------------------------------------"
 } > "$summary_report"
 

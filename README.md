@@ -20,7 +20,7 @@ As part of the project, I am also integrating a plotting utility that visualizes
 
 For ease of experimentation and reproducibility, all data used in the calculations and plots, including example glycopeptides and their corresponding glycan compositions, are provided in organized folders. This setup allows for quick reference and testing of different theoretical models and fragmentation pathways.
 
-*Note*: This project is for fun and more of an exploration of glycoprotoemic space in silico. Who know where this may lead.
+*Note*: This project is for fun and more of an exploration of glycoproteomic space in silico. Who know where this may lead.
 
 # Table of Contents
 
@@ -102,6 +102,7 @@ python glycopeptide_finder_cmd.py -i <input_fasta> [-o <output_csv>] [-p <protea
 - `-v`, `--verbose` (optional): Enable verbose output. Default is False.
 - `-y`, `--glycan`: Path to the glycan file (CSV format) (Default, 4 glycans stored in file). 
 - `-z`, `--charge`: (Optional) Maximum charge state to compute (default: 5).
+- `-m`, `--max_peptide_length`: (Optional) Max peptide length after digestion (default: 50).
 
 ### Example
 

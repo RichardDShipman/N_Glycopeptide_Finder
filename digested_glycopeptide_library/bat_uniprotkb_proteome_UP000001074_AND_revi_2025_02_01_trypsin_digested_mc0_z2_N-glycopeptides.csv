@@ -1,5 +1,1 @@
-ProteinID,Site,Peptide,Start,End,Length,Sequon,PredictedMass,Hydrophobicity,pI,Protease,GlycosylationType,MissedCleavages,Species,TaxonID,GeneName,ProteinEvidence,SequenceVersion
-sp|Q6B4U9|PRDX1_MYOLU,nan,nan,,,nan,nan,nan,nan,nan,trypsin,N,0.0,Myotis lucifugus,59463,PRDX1,1,1
-sp|Q865F7|FABPH_MYOLU,nan,nan,,,nan,nan,nan,nan,nan,trypsin,N,0.0,Myotis lucifugus,59463,FABP3,2,3
-sp|Q957A8|CYB_MYOLU,nan,nan,,,nan,nan,nan,nan,nan,trypsin,N,0.0,Myotis lucifugus,59463,MT-CYB,3,1
-sp|G1QDE8|SIM12_MYOLU,nan,nan,,,nan,nan,nan,nan,nan,trypsin,N,0.0,Myotis lucifugus,59463,SMIM12,3,1
+
