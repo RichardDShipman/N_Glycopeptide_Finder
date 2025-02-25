@@ -46,6 +46,7 @@ Author:
 """
 import argparse
 import csv
+from itertools import permutations
 import re
 from Bio import SeqIO
 import os
@@ -661,7 +662,7 @@ def main():
     parser.add_argument("-y", "--glycan", default=None, help="Path to glycan file (CSV). Default is 'default_glycan_library.csv'.")
     parser.add_argument("-l", "--log", help="Provide log file name. (suggestion: -l log.txt)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output.")
-    parser.add_argument("-z", "--charge", type=int, default=5, help="Maximum charge state (default: 5).")
+    parser.add_argument("-z", "--charge", type=int, default=3, help="Maximum charge state (default: 3).")
     parser.add_argument("-m", "--peptide_max_length", type=int, default=25, help="Max peptide length from digestion(default is 25).")
 
     # Parse arguments

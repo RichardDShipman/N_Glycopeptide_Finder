@@ -5,10 +5,10 @@ start_time=$(date +%s)
 # cores
 cores=4
 
-# Input file directory
+# Input file directory (-i)
 input_dir="test_proteomes"
 
-# Protease
+# Protease (-p)
 protease="trypsin"  # Cleaves after K or R unless followed by P
 #protease="chymotrypsin"  # Cleaves after F, W, or Y unless followed by P
 #protease="pepsin"  # Cleaves after F, W, or Y
@@ -19,16 +19,16 @@ protease="trypsin"  # Cleaves after K or R unless followed by P
 #protease="proteinase-k"  # Cleaves after A, F, I, L, V, W, Y
 #protease="all" # all proteases
 
-# missed cleavages and max peptide length filter
+# missed cleavages and max peptide length filter (-c, -m)
 missed_cleavages=0
 max_peptide_length=25
 
-# Glycosylation type
+# Glycosylation type (-g)
 glycosylation_type="N"
 #glycosylation_type="O"
 #glycosylation_type="C"
 
-# Charge states
+# Charge states (-z)
 charge_state=2
 
 # welcome message
@@ -51,32 +51,6 @@ echo "Welcome to the Batch Run of the Glycopeptide Sequence Finder!"
 echo "$ascii_glycopeptide1"
 echo "Starting glycopeptide sequence finder..."
 echo "Please wait while the glycopeptide sequence finder is running..."
-echo "LETS GET READY TO FIND SOME GLYCOPEPTIDE SEQUENCES!!!"
-echo "Wasting time... loading peptides... loading glycans... loading glycopeptides... testing user's patience..."
-echo "Glycopeptide sequence finder is running... maybe... I think... I hope... I'm not sure... I'm just a computer... "
-echo "I don't know what I'm doing... I'm just finding... Must find glycopeptides. Must find glycopeptides. Must find glycopeptides."
-echo "Stay tuned! We are preparing the ultimate glycopeptide discovery mission!"
-echo "Running super advanced algorithms... in the background... somewhere... probably..."
-echo "💀 ERROR: WHOA, BRO! Glycosylation type 'X' just crashed the party! ❌"
-echo "What are you even doing? Only 'N', 'O', or 'C' are allowed in this twisted code dimension! 🔥"
-echo "Check yourself before you wreck yourself—fix it ASAP, or this thing's gonna get REAL weird. 🤖💥"
-echo "💀 DEBUG: LOOKING FOR GLYCOSYLATION TYPES... N, O, C ONLY... X? BRUHHHHHH!"
-echo "Don't panic, I'm sure we'll find those glycopeptides. Or maybe not. I'm just a computer after all."
-echo "LET'S GO ALREADY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-echo "Ope! Here I got glycopeptiding again! 🤣"
-sleep 1
-echo "WARNING: CPU TEMP THRESHOLD EXCEEDED! 🔥"
-echo ""
-echo "Traceback (most recent call last):"
-echo "  File \"<system>\", line 42, in monitor_cpu"
-echo "    check_temperature()"
-echo "  File \"<system>\", line 17, in check_temperature"
-echo "    raise OverheatedCPUError(\"CPU temperature is too high! 🚨\")"
-echo "OverheatedCPUError: CPU Temp: 108°C | Safe Range: 30°C - 80°C 🌡️"
-echo ""
-echo "💀 ACTION REQUIRED: Cool down your system or prepare for thermal throttling! 🔥"
-sleep 1
-echo "Rebooting finder. Beeep booop. *sounds*"
 
 # Run the glycopeptide sequence finder script
 time ls ${input_dir}/*.fasta | xargs -I {} -P ${cores} python glycopeptide_sequence_finder_cmd.py \
@@ -95,23 +69,6 @@ peptide_count=$(tail -n +2 digested_peptide_library/*.csv | wc -l)
 
 # Count the number of glycopeptide sequences, row entries, in all csv files in the digested_glycopeptide_library directory, ignoring headers
 glycopeptide_count=$(tail -n +2 digested_glycopeptide_library/*.csv | wc -l)
-
-# Mess with user
-echo "🔥 SYSTEM OVERHEAT DETECTED 🔥"
-echo ""
-echo "Traceback (most recent call last):"
-echo "  File \"<system>\", line 1337, in cool_down"
-echo "    prevent_meltdown()"
-echo "  File \"<system>\", line 404, in prevent_meltdown"
-echo "    raise ThermalRunawayError(\"🔥 CPU TEMP CRITICAL 🔥\")"
-echo "ThermalRunawayError: System is now entering emergency cooldown mode... ☠️"
-echo ""
-echo "[ERROR] CPU TEMP: 105°C 🌡️ (Max Safe: 80°C)"
-echo "[SYSTEM] Engaging failsafe protocol... ⏳"
-echo "[WARNING] All unsaved data is about to vanish into the void... 🫠"
-echo "[REBOOTING] Hold on to your circuits... 💀"
-echo ""
-echo "🔄 Rebooting in 3... 2... 1... 🚀"
 
 ascii_glycopeptide2="
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

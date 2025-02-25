@@ -534,6 +534,7 @@ Test proteome files from UniProt are available in the `test_proteomes` folder. B
 | Fruit Fly     | Drosophila melanogaster                                                         | 7227                    |
 | Goat          | Capra hircus                                                                    | 9925                    |
 | Guinea Pig    | Cavia porcellus                                                                 | 10141                   |
+| Hemp          | Cannabis sativa                                                                 | 4565                    |
 | Honeybee      | Apis mellifera                                                                  | 7460                    |
 | Horse         | Equus caballus                                                                  | 9796                    |
 | Human         | Homo sapiens                                                                    | 9606                    |
@@ -545,6 +546,7 @@ Test proteome files from UniProt are available in the `test_proteomes` folder. B
 | Sheep         | Ovis aries                                                                      | 9940                    |
 | Sorghum       | Sorghum bicolor                                                                 | 4558                    |
 | Squirrel      | Ictidomys tridecemlineatus                                                      | 43179                   |
+| Wheat         | Triticum aestivum                                                               | 4565                    |
 | Yeast         | Saccharomyces cerevisiae (strain ATCC 204508 / S288c)                           | 559292                  |
 | Zebrafish     | Danio rerio                                                                     | 7955                    |
 
