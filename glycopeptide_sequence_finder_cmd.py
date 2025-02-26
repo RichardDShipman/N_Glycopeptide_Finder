@@ -2,41 +2,8 @@
 glycopeptide_sequence_finder_cmd.py
 
 This script processes a FASTA file to identify glycopeptides based on protease cleavage rules and glycosylation sequons, 
-predicts their masses, calculates their hydrophobicity, and calculates their pI. The results are written to a CSV file.
-
-Functions:
-    cleave_sequence(sequence, protease, missed_cleavages):
-        Cleaves a sequence based on protease rules.
-    
-    find_glycopeptides(peptides, full_sequence, glycosylation_type):
-        Identifies peptides containing glycosylation sequons and maps the sites to the full protein sequence.
-    
-    calculate_peptide_mass(sequence):
-        Calculates the mass of a peptide.
-    
-    predict_hydrophobicity(peptide_sequence):
-        Predicts the hydrophobicity of a peptide sequence using the Kyte-Doolittle scale.
-    
-    calculate_pI(peptide_sequence):
-        Calculates the isoelectric point (pI) of a peptide sequence.
-    
-    process_fasta(file, protease, missed_cleavages, glycosylation_type):
-        Processes the input FASTA file and extracts glycopeptides.
-    
-    write_csv(output_file, data):
-        Writes results to a CSV file.
-    
-    compute_mz(mass, charge):
-        Compute m/z value for a given mass and charge state.
-
-    process_glycopeptides(peptide_file, glycan_file, max_charge):
-        Generate glycopeptides and compute m/z values.
-    
-    setup_logging(log_file):
-        Sets up logging to a file.
-    
-    main():
-        Main function to parse arguments and execute the glycopeptide finding process.
+predicts their masses, calculates their hydrophobicity, and calculates their pI. The results are written to a CSV file 
+in the digest_glycopeptide_library directory.
 
 Usage:
     python glycopeptide_sequence_finder_cmd.py -i <input_fasta_file> -o <output_csv_file> -p <protease> -g <glycosylation_type> -c <missed_cleavages> -l <log_file> -v -y <glycan_file> -z <max_charge>
@@ -52,6 +19,8 @@ from Bio import SeqIO
 import os
 import logging
 import pandas as pd
+
+# Constants
 
 # Define protease cleavage rules
 proteases = {
@@ -101,13 +70,13 @@ default_n_glycan_library = pd.DataFrame([
     #{"glytoucan_ac": "G58087IP", "byonic": "HexNAc(2)Hex(11) % 2188.739804", "composition": "HexNAc(2)Hex(11)", "mass": 2188.739804, "shorthand_glycan": "N2H11"}, # N2H11
     #{"glytoucan_ac": "G83460ZZ", "byonic": "HexNAc(2)Hex(10) % 2026.686980", "composition": "HexNAc(2)Hex(10)", "mass": 2026.686980, "shorthand_glycan": "N2H10"}, # N2H10
     #{"glytoucan_ac": "G80920RR", "byonic": "HexNAc(2)Hex(9) % 1864.634157", "composition": "HexNAc(2)Hex(9)", "mass": 1864.634157, "shorthand_glycan": "N2H9"}, # N2H9
-    {"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333, "shorthand_glycan": "N2H8"}, # N2H8 -- High Mannose
+    #{"glytoucan_ac": "G62765YT", "byonic": "HexNAc(2)Hex(8) % 1702.581333", "composition": "HexNAc(2)Hex(8)", "mass": 1702.581333, "shorthand_glycan": "N2H8"}, # N2H8 -- High Mannose
     #{"glytoucan_ac": "G31852PQ", "byonic": "HexNAc(2)Hex(7) % 1540.528510", "composition": "HexNAc(2)Hex(7)", "mass": 1540.528510, "shorthand_glycan": "N2H7"}, # N2H7
     #{"glytoucan_ac": "G41247ZX", "byonic": "HexNAc(2)Hex(6) % 1378.475686", "composition": "HexNAc(2)Hex(6)", "mass": 1378.475686, "shorthand_glycan": "N2H6"}, # N2H6
+    {"glytoucan_ac": "G22768VO", "byonic": "HexNAc(2)Hex(3) % 1216.422863", "composition": "HexNAc(2)Hex(3)", "mass": 1216.422863, "shorthand_glycan": "N2H3"}, # N2H3
     #{"glytoucan_ac": "G36670VW", "byonic": "HexNAc(5)Hex(5)dHex(1)NeuAc(2) % 2553.909723", "composition": "HexNAc(5)Hex(5)dHex(1)NeuAc(2)", "mass": 2553.909723, "shorthand_glycan": "N5H5F1S2"}  # N5H5F1S2 -- # Complex - Fucosylation, Sialylated
     #{"glytoucan_ac": "G29068FM", "byonic": "HexNAc(1) % 221.089937305", "composition": "HexNAc(1)", "mass": 221.089937305, "shorthand_glycan": "N1"}, # N1 -- EndoH Treatment HexNAc
     #{"glytoucan_ac": "G04038LG", "byonic": "HexNAc(1)dHex(1) % 367.147846175", "composition": "HexNAc(1)dHex(1)", "mass": 367.147846175, "shorthand_glycan": "N1F1"}, # N1F1 -- EndoH Treatment HexNAc (Fuc-Core)
-
 ])
 
 # Define default O-glycan mass library as a DataFrame (O-GalNAc Glycans) Using most common O-glycans as default, HexNac(1) with no stereochemistry
@@ -152,6 +121,8 @@ default_glycan_hydrophobicity = {
     "N2H11": -2.53305E-05,
     "N2H12": 5.36847E-06
 }
+
+# Functions
 
 def cleave_sequence(sequence, protease, missed_cleavages=0):
     """Cleaves a sequence based on protease rules."""
@@ -209,6 +180,7 @@ def calculate_peptide_mass(sequence):
 def predict_hydrophobicity(peptide_sequence):
     """Predicts the hydrophobicity of a peptide sequence using the Kyte-Doolittle scale."""
     
+    # safety check for empty peptide strings
     if len(peptide_sequence) == 0:
         return 0.0
 
@@ -273,8 +245,8 @@ def calculate_pI(peptide_sequence):
 
 def compute_mz(mass, charge):
     """Compute m/z value for a given mass and charge state."""
-    proton_mass = 1.007276
-    return (mass + (charge * proton_mass)) / charge
+    proton = 1.007276
+    return (mass + (charge * proton)) / charge
 
 # experimental glycopeptide hydrophobicity calculation
 def compute_hf_experimental(peptide_hydrophobicity, glycan, hf_weight=10, rt_scale=60):
@@ -292,7 +264,23 @@ def compute_hf_experimental(peptide_hydrophobicity, glycan, hf_weight=10, rt_sca
     return round(hf_experimental, 5), rt_hf_experimental
 
 def process_glycopeptides(peptide_file, glycans, max_charge):
-    """Generate glycopeptides and compute m/z values."""
+    """
+    Generate glycopeptide variants by combining peptides and glycans, and compute their mass-to-charge (m/z) values.
+    Parameters:
+        peptide_file (str): Path to the CSV file containing peptide data. The CSV file should include columns such as
+                            'ProteinID', 'Site', 'Peptide', 'PredictedMass', 'Length', 'Sequon', 'Hydrophobicity', and 'pI'.
+        glycans (pandas.DataFrame): DataFrame containing glycan data. This DataFrame should include columns such as
+                                    'glytoucan_ac', 'composition', and 'mass'.
+        max_charge (int): The maximum charge state for which m/z values will be computed. m/z values are calculated for charge
+                          states ranging from 2 up to and including max_charge.
+    Returns:
+        pandas.DataFrame: A DataFrame where each row represents a glycopeptide, including the following columns:
+    Notes:
+        - The peptide CSV file is loaded with low_memory=False to improve type inference.
+        - Non-numeric values in the 'PredictedMass' column are coerced to NaN and subsequently dropped.
+        - It is assumed that the compute_mz() function is defined in the same scope where process_glycopeptides() is used.
+    """
+    
     # Load peptide and glycan data
     peptides = pd.read_csv(peptide_file, low_memory=False)
     
@@ -320,10 +308,9 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
                 'Site': pep['Site'],
                 'GlyToucan_AC': gly['glytoucan_ac'],
                 'Composition': gly['composition'],
-                #'converted_glycan': gly['converted_glycan'],
                 'Peptide': pep['Peptide'],
-                #'Start': pep['Start'],
-                #'End': pep['End'],
+                'Start': pep['Start'],
+                'End': pep['End'],
                 'Length': pep['Length'],
                 'Sequon': pep['Sequon'],
                 'GlycopeptideMass': glycopeptide_mass,
@@ -331,14 +318,6 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
                 'GlycanMass': gly['mass'],
                 'Hydrophobicity': pep['Hydrophobicity'],
                 'pI': pep['pI'],
-                #'Protease': pep['Protease'],
-                #'GlycosylationType': pep['GlycosylationType'],
-                #'MissedCleavages': pep['MissedCleavages'],
-                #'Species': pep['Species'],
-                #'TaxonID': pep['TaxonID'],
-                #'GeneName': pep['GeneName'],
-                #'ProteinEvidence': pep['ProteinEvidence'],
-                #'SequenceVersion': pep['SequenceVersion'],
                 **mz_values, # z charge states values
             }
 
@@ -448,7 +427,7 @@ def calculate_n_glycopeptide_ions(peptide, glycan_composition, glycan_frag_order
     cumulative = 0.0
     for i in range(len(peptide) - 1, 0, -1):
         cumulative += amino_acid_masses[peptide[i]]
-        y_ions.insert(0, round((cumulative + water + proton) / charge, 4))
+        y_ions.append(round((cumulative + water + proton) / charge, 4))
 
     # --- Calculate c ions (ETD/ECD) ---
     # c ions are the N-terminal fragments with an added NH3 group.
@@ -466,12 +445,12 @@ def calculate_n_glycopeptide_ions(peptide, glycan_composition, glycan_frag_order
     for i in range(len(peptide) - 1, 0, -1):
         cumulative += amino_acid_masses[peptide[i]]
         # (cumulative + water + proton) is the y-ion mass; subtract water and NH3
-        z_ions.insert(0, round((cumulative + proton - NH3) / charge, 4))
+        z_ions.append(round((cumulative + proton - NH3) / charge, 4))
 
     # --- Glycan Calculations ---
     glycan_total_mass = sum(monosaccharide_library[sugar]['mass'] * count 
                               for sugar, count in glycan_dict.items())
-    intact_glycopeptide_mass = peptide_mass + glycan_total_mass
+    #intact_glycopeptide_mass = peptide_mass + glycan_total_mass
 
     # --- Calculate Y ions (glycan-attached peptide fragments) ---
     Y_ions = {}
@@ -576,6 +555,7 @@ def calculate_n_glycopeptide_ions(peptide, glycan_composition, glycan_frag_order
         if count > 0:
             oxonium_ions[f'ox_{sugar}'] = round(monosaccharide_library[sugar]['mass'] + proton, 4)
 
+    # Return ion series in a dictionary
     return {
         'b': b_ions,
         'y': y_ions,
@@ -586,6 +566,14 @@ def calculate_n_glycopeptide_ions(peptide, glycan_composition, glycan_frag_order
         'B': B_ions,
         'oxonium': oxonium_ions,
     }
+
+# Add this function to write the results to a CSV file
+def write_csv(output_file, data):
+    """Writes results to a CSV file."""
+    with open(output_file, mode="w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=["ProteinID", "Site", "Peptide", "Start", "End", "Length", "Sequon", "PredictedMass", "Hydrophobicity", "pI"])
+        writer.writeheader()
+        writer.writerows(data)
 
 ## Experimental -- testing
 #from itertools import permutations
@@ -640,30 +628,23 @@ def generate_all_y_ions(peptide, glycan_composition, charge=1):
 
     return all_Y_ions
 
-# Add this function to write the results to a CSV file
-def write_csv(output_file, data):
-    """Writes results to a CSV file."""
-    with open(output_file, mode="w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=["ProteinID", "Site", "Peptide", "Start", "End", "Length", "Sequon", "PredictedMass", "Hydrophobicity", "pI", "Protease", "GlycosylationType", "MissedCleavages", "Species", "TaxonID", "GeneName", "ProteinEvidence", "SequenceVersion"])
-        writer.writeheader()
-        writer.writerows(data)
-
 # Add this to the main function to set up logging
 def main():
     
-    # SETUP ARGUMENT PARSER
+    # PARAMETER SETUP ARGUMENT PARSER
     
+    # Set up the argument parser
     parser = argparse.ArgumentParser(description="Glycopeptide Finder")
     parser.add_argument("-i", "--input", required=True, help="Input FASTA file. Can be found in the test_proteomes folder.")
     parser.add_argument("-g", "--glycosylation", default="N", help="Glycosylation type (N, O, or C). Default is N. Large file sizes may result from selecting O or C.")
     parser.add_argument("-o", "--output", help="Output CSV file prefix. Default output directory for files is 'digested_glycopeptide_library'.")
     parser.add_argument("-p", "--protease", default="trypsin", help="Protease to use for cleavage ('all' for all proteases). Default is trypsin. Proteases: trypsin, chymotrypsin, glu-c, lys-c, arg-c, pepsin, asp-n, proteinase-k.")
     parser.add_argument("-c", "--missed_cleavages", type=int, default=0, help="Number of missed cleavages allowed. Default is 0.")
+    parser.add_argument("-m", "--peptide_max_length", type=int, default=25, help="Max peptide length from digestion(default is 25).")
     parser.add_argument("-y", "--glycan", default=None, help="Path to glycan file (CSV). Default is 'default_glycan_library.csv'.")
     parser.add_argument("-l", "--log", help="Provide log file name. (suggestion: -l log.txt)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output.")
     parser.add_argument("-z", "--charge", type=int, default=3, help="Maximum charge state (default: 3).")
-    parser.add_argument("-m", "--peptide_max_length", type=int, default=25, help="Max peptide length from digestion(default is 25).")
 
     # Parse arguments
     args = parser.parse_args()
@@ -676,10 +657,10 @@ def main():
     input_file = args.input
     base_filename = input_file.rsplit(".", 1)[0]
     missed_cleavages = args.missed_cleavages
+    peptide_max_length = args.peptide_max_length
     glycosylation_type = args.glycosylation
     charge_state = args.charge
     glycan_library = args.glycan
-    l_input_arg = args.peptide_max_length
 
     # Set default glycan library based on glycosylation type only if no glycan library is provided
     if glycan_library is None:
@@ -748,13 +729,6 @@ def main():
 
         # Add other columns to the DataFrame
         digest_peptide_library["ProteinID"] = results_df["ProteinID"].tolist()[0]
-        #digest_peptide_library["Protease"] = protease
-        #digest_peptide_library["MissedCleavages"] = missed_cleavages
-        #digest_peptide_library["Species"] = results_df["Species"].tolist()[0]
-        #digest_peptide_library["TaxonID"] = results_df["TaxonID"].tolist()[0]
-        #digest_peptide_library["GeneName"] = results_df["GeneName"].tolist()[0]
-        #digest_peptide_library["ProteinEvidence"] = results_df["ProteinEvidence"].tolist()[0]
-        #digest_peptide_library["SequenceVersion"] = results_df["SequenceVersion"].tolist()[0]
 
         # Remove duplicate peptide entries in digest_peptide_library (No, Proteomic Parsimony)
         #digest_peptide_library = digest_peptide_library.drop_duplicates(subset=["Peptide"])
@@ -791,32 +765,23 @@ def main():
                 end_pos = start_pos + len(peptide) - 1
                 all_glycopeptides.append({
                     "ProteinID": protein_id,
-                    "Site": round(pd.to_numeric(site),0),#.astype(int),#.replace(to_replace=r'\.0$', value='', regex=True),
+                    "Site": int(site),
                     "Peptide": peptide,
-                    #"Start": start_pos,
-                    #"End": end_pos,
+                    "Start": int(start_pos),
+                    "End": int(end_pos),
                     "Length": len(peptide),
                     "Sequon": sequence[site - 1:site + 2], # Extract the sequon amino acid sequence + 1 flanking residue
                     "PredictedMass": mass,
                     "Hydrophobicity": hydrophobicity,
                     "pI": pI,
-                    #"Protease": protease,
-                    #"GlycosylationType": glycosylation_type,
-                    #"MissedCleavages": missed_cleavages,
-                    #"Species": row["Species"], # Uncomment to include 
-                    #"TaxonID": row["TaxonID"],
-                    #"GeneName": row["GeneName"],
-                    #"ProteinEvidence": row["ProteinEvidence"],
-                    #"SequenceVersion": row["SequenceVersion"]
+
                 })
         
         # List to pandas dataframe
         all_glycopeptides = pd.DataFrame(all_glycopeptides)
         
         # Now apply filtering (peptide length less than 50 or set as desired. maybe by users. this saves room too data wise.)
-        peptide_max_length = l_input_arg
-
-        # Filter out peptides with length greater than the specified maximum length
+        # Filter out peptides with length greater than the specified maximum length (-m flag)
         if not all_glycopeptides.empty and 'Peptide' in all_glycopeptides.columns:
             all_glycopeptides = all_glycopeptides.loc[all_glycopeptides['Peptide'].str.len() <= peptide_max_length]
         else:
@@ -834,7 +799,7 @@ def main():
         output_file = args.output or f"{output_dir}/{base_filename}_{protease}_digested_mc{missed_cleavages}_z{charge_state}_{glycosylation_type}-glycopeptides.csv"
         
         # Filter out unwanted fields before writing to CSV
-        filtered_results = [{k: v for k, v in result.items() if k in ["ProteinID", "Site", "Peptide", "Start", "End", "Length", "Sequon", "PredictedMass", "Hydrophobicity", "pI", "Protease", "GlycosylationType", "MissedCleavages", "Species", "TaxonID", "GeneName", "ProteinEvidence", "SequenceVersion"]} for result in all_results]
+        filtered_results = [{k: v for k, v in result.items() if k in ["ProteinID", "Site", "Peptide", "Start", "End", "Length", "Sequon", "PredictedMass", "Hydrophobicity", "pI"]} for result in all_results]
         
         # write results
         write_csv(output_file, filtered_results)

@@ -13,17 +13,17 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ==================== Glycopeptide Sequence Finder Summary ====================
 After some finding and searching for glycopeptides in input protein/proteome FASTA...
-Total Peptide Sequences Found:  5852170
+Total Peptide Sequences Found:  6454784
 Peptides generated using trypsin digestion with 0 missed cleavages.
-Total Glycopeptide Sequences Found:   201221
+Total Glycopeptide Sequences Found:   220902
 ---------------------------------------------------------------------------
 Batch Run Summary:
-Total Elapsed Time: 1.11 minutes
+Total Elapsed Time: 1.26 minutes
 Protease Used: trypsin
 Missed Cleavages: 0
 Glycosylation Type: N-Glycosylation
-Number of Peptide Sequences:  5852170
-Number of N-Glycopeptide Sequences:   201221
+Number of Peptide Sequences:  6454784
+Number of N-Glycopeptide Sequences:   220902
 ---------------------------------------------------------------------------
 Thank you for using the Glycopeptide Sequence Finder!
 Please come back when you're ready to discover more glycopeptides!

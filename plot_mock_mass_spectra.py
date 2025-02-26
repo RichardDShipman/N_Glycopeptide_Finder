@@ -56,20 +56,20 @@ def compute_ion_number(row):
         b_ions = [f"b{i+1}" for i in range(len(ion_series['b']))]
         ion_numbers.extend(b_ions)
     
-    # Process y ions (order reversed)
+    # Process y ions 
     if 'y' in ion_series:
         y_ions = [f"y{i+1}" for i in range(len(ion_series['y']))]
-        ion_numbers.extend(y_ions[::-1])  # Reverse the y ions
+        ion_numbers.extend(y_ions)  
     
     # Process c ions
     if 'c' in ion_series:
         c_ions = [f"c{i+1}" for i in range(len(ion_series['c']))]
         ion_numbers.extend(c_ions)
     
-    # Process z ions (order reversed)
+    # Process z ions 
     if 'z' in ion_series:
         z_ions = [f"z{i+1}" for i in range(len(ion_series['z']))]
-        ion_numbers.extend(z_ions[::-1])
+        ion_numbers.extend(z_ions)
     
     # Process Y ions
     if 'Y' in ion_series:
@@ -128,11 +128,7 @@ def create_mass_spectrum_plot(df, color_mapping, title):
                 total_length = len(values)
 
                 for i, mz in enumerate(values, start=0):
-                    if ion_type in ['b', 'c']:  # Normal numbering
-                        ion_number = i + 1
-                    elif ion_type in ['y', 'z']:  # Reverse numbering
-                        ion_number = total_length - i
-
+                    ion_number = i + 1
                     ion_label = f"{ion_type}{ion_number}"
                     line_length = ion_length_map.get(ion_type, 50)
                     color = color_mapping.get(ion_type, "black")
@@ -206,8 +202,6 @@ def main():
   # Ensure IonSeries is parsed as dictionary
   df['IonSeries'] = df['IonSeries'].apply(ast.literal_eval)
   df['ion_number'] = df.apply(compute_ion_number, axis=1)
-
-  #print(df)
 
   # Creat output directory
   create_output_directory(output_dir)

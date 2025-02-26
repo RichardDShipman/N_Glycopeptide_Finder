@@ -467,6 +467,10 @@ Kardell, Oliver, Thomas Gronauer, Christine von Toerne, Juliane Merl-Pham, Ann-C
 
 York WS, Mazumder R, Ranzinger R, Edwards N, Kahsay R, Aoki-Kinoshita KF, Campbell MP, Cummings RD, Feizi T, Martin M, Natale DA, Packer NH, Woods RJ, Agarwal G, Arpinar S, Bhat S, Blake J, Castro LJG, Fochtman B, Gildersleeve J, Goldman R, Holmes X, Jain V, Kulkarni S, Mahadik R, Mehta A, Mousavi R, Nakarakommula S, Navelkar R, Pattabiraman N, Pierce MJ, Ross K, Vasudev P, Vora J, Williamson T, Zhang W. GlyGen: Computational and Informatics Resources for Glycoscience. Glycobiology. 2020 Jan 28;30(2):72-73. doi: 10.1093/glycob/cwz080. PMID: 31616925; PMCID: PMC7335483.
 
+- Glycosylation of Viral Proteins: Implication in Virus–Host Interaction and Virulence.
+
+Feng, Tingting, Jinyu Zhang, Zhiqian Chen, Wen Pan, Zhengrong Chen, Yongdong Yan, and Jianfeng Dai. “Glycosylation of Viral Proteins: Implication in Virus–Host Interaction and Virulence.” Virulence 13, no. 1 (n.d.): 670–83. https://doi.org/10.1080/21505594.2022.2060464.
+
 # Appendix
 
 Additional information, logging runs, and references.
@@ -514,41 +518,114 @@ done
 
 Test proteome files from UniProt are available in the `test_proteomes` folder. Below is a list of species gathered. Only reviewed proteins were downloaded, and not every sequence available for a species is included. 
 
+I used these test proteomes to generate a zoo of glycopeptides under constrained conditions to fit into a GitHub repo. To build full zoo, remove constraints in batch processing script.
+
 | Common Name   | Scientific Name                                                                 | Taxon ID                |
 |---------------|---------------------------------------------------------------------------------|-------------------------|
-| SARS-CoV      | SARS-CoV (Severe Acute Respiratory Syndrome Coronavirus)                        | 694009                  |
+| Alpaca | Vicugna pacos | 30538 |
+| Amoeba | Naegleria gruberi | 5762 |
+| Anemone | Nematostella vectensis | 45351 |
+| Ant | Camponotus floridanus | 104421 |
 | Apple         | Malus domestica                                                                 | 3750                    |
 | Arabidopsis   | Arabidopsis thaliana                                                            | 3702                    |
+| Aspergillus | Aspergillus fumigata (strain ATCC MYA-4609 / CBS 101355 / FGSC A1100 / Af293) | 330879 |
 | Bat           | Myotis lucifugus                                                                | 59463                   |
+| Black Truffle | Tuber melanosporum (strain Mel28) | 656061 | 
+| Brown Alga | Ectocarpus siliculosus | 2880 |
+| Bushbaby | Otolemur garnettii | 30611 |
+| Camel | Camelus bactrianus | 9837 |
 | Cat           | Felis catus                                                                     | 9685                    |
 | C. elegans    | Caenorhabditis elegans                                                          | 6239                    |
+| Chameleon | Anolis carolinensis | 28377 |
+| Charcoal Rot | Macrophomina phaseolina (strain MS6) | 1126212 |
 | Chicken       | Gallus gallus                                                                   | 9031                    |
 | Chimpanzee    | Pan troglodytes                                                                 | 9598                    |
+| Chinchilla | Chinchilla lanigera | 34839 |
 | C. jejuni     | Campylobacter jejuni                                                            | 1951                    |
 | Cow           | Bos taurus                                                                      | 9913                    |
+| Crocodile | Crocodylus porosus | 8502 |
+| Corn Smut | Mycosarcoma maydis | 5270 |
+| Date Palm | Phoenix dactylifera | 42345 |
+| Deer Tick | Ixodes scapularis | 6945 | 
 | Dictyostelium | Dictyostelium discoideum                                                        | 44689                   |
 | Dog           | Canis lupus familiaris                                                          | 9615                    |
 | Donkey        | Equus asinus                                                                    | 9796                    |
 | Duck          | Cairina moschata                                                                | 8855                    |
+| Ebola | Zaire ebolavirus (strain Mayinga-76) | 128952 | 
 | Elephant      | Loxodonta africana (African Elephant)                                           | 9785                    |
+| Ferret | Mustela putorius furo | 9669 |
+| Frog | Xenopus laevis | 8355 |
 | Fruit Fly     | Drosophila melanogaster                                                         | 7227                    |
 | Goat          | Capra hircus                                                                    | 9925                    |
+| Gorilla | Gorilla gorilla gorilla | 9595 |
+| Grape | Vitis vinifera | 29760 |
+| Green Alga | Chlamydomonas reinhardtii | 3055 |
 | Guinea Pig    | Cavia porcellus                                                                 | 10141                   |
+| Hamster | Mesocricetus auratus | 10036 | 
 | Hemp          | Cannabis sativa                                                                 | 4565                    |
+| HHV-1 | Human herpesvirus 1 (strain 17) | 10299 | 
+| HIV-1 | Human immunodeficiency virus type 1 group N (isolate YBF30) | 388818 |
+| HIV-2 | Human immunodeficiency virus type 2 subtype A (isolate BEN) | 11714 | 
 | Honeybee      | Apis mellifera                                                                  | 7460                    |
 | Horse         | Equus caballus                                                                  | 9796                    |
+| HRSV S-2 | Human respiratory syncytial virus A (strain S-2) | 410078 | 
 | Human         | Homo sapiens                                                                    | 9606                    |
+| Influenza B | Influenza B virus (strain B/Lee/1940) | 518987 |
+| Influenza C | Influenza C virus (strain C/Ann Arbor/1/1950) | 11553 |
+| JEV | Japanese encephalitis virus (strain M28) | 2555554 |
+| Kidney Bean | Phaseolus vulgaris | 3885 |
+| LASV | Lassa virus (strain Mouse/Sierra Leone/Josiah/1976) | 11622 |
+| LCMV | Lymphocytic choriomeningitis virus (strain Armstrong) | 11624 |
+| Lemur | Microcebus murinus | 30608 |
+| Macaque (Rhesus monkey) | Macaca mulatta | 9544 |
+| Maize | Zea mays | 4577 |
+| Monkey (cynomolgus, crab-eating) | Macaca fascicularis | 9541 |
+| Mosquito (African malaria) | Anopheles gambiae | 7165 |
 | Mouse         | Mus musculus                                                                    | 10090                   |
+| Naked Mole Rat | Heterocephalus glaber | 10181 |
+| Nematode (roundworm) | Caenorhabditis briggsae | 6238 |
+| Opossum | Monodelphis domestica | 13616 | 
+| Orange | Citrus sinensis | 2711 |
 | Orangutan     | Pongo abelii                                                                    | 9601                    |
+| Oyster | Magallana gigas | 29159 |
+| Peach | Prunus persica | 3760 | 
+| Penicillium | Penicillium rubens (strain ATCC 28089 / DSM 1075 / NRRL 1951 / Wisconsin 54-1255) | 500485 | 
 | Pig           | Sus scrofa domesticus                                                           | 9823                    |
+| Platypus | Ornithorhynchus anatinus | 9258 | 
+| Potato | Solanum tuberosum | 4113 |
+| Pufferfish | Takifugu rubripes | 31033 | 
+| Rabbit | Oryctolagus cuniculus | 9986 |
 | Rat           | Rattus norvegicus                                                               | 10116                   |
+| Red Alga | Cyanidioschyzon merolae (strain NIES-3377 / 10D) | 280699 |
 | Rice          | Oryza sativa subsp. japonica                                                    | 39947                   |
+| SARS-CoV      | SARS-CoV (Severe Acute Respiratory Syndrome Coronavirus)                        | 694009                  |
+| SFTSV | SFTS phlebovirus (isolate SFTSV/Human/China/HB29/2010) | 992212 |
+| Shark | Callorhinchus milii | 7868 | 
 | Sheep         | Ovis aries                                                                      | 9940                    |
+| Silk Moth | Bombyx mori | 7091 |
+| Silveira (Coccidioides Silveira strain) | Coccidioides posadasii (strain RMSCC 757 / Silveira) | 443226 | 
+| Snake (Brown Eastern) | Pseudonaja textilis | 8673 | 
+| Softshell Turtle | Pelodiscus sinensis | 13735 | 
+| Spike Moss (lycophyte) | Selaginella moellendorffii | 88036 | 
+| Sponge | Amphimedon queenslandica | 400682 |
 | Sorghum       | Sorghum bicolor                                                                 | 4558                    |
 | Squirrel      | Ictidomys tridecemlineatus                                                      | 43179                   |
+| Tilapia | Oreochromis niloticus | 8128 | 
+| Tomato | Solanum lycopersicum | 4081 |
+| Trout (Brown) | Oreochromis niloticus | 8128 | 
+| Turkey | Meleagris gallopavo | 9103 | 
+| Urchin | Strongylocentrotus purpuratus | 7668 |
+| VZV | Varicella-zoster virus (strain Dumas) | 10338 |
+| Wasp (parasitoid) | Nasonia vitripennis | 7425 |
 | Wheat         | Triticum aestivum                                                               | 4565                    |
+| Wild Rice (North America) | Oryza nivara | 4536 | 
+| WNV | West Nile virus | 11082 | 
+| Yak | Bos mutus grunniens | 30521 |
 | Yeast         | Saccharomyces cerevisiae (strain ATCC 204508 / S288c)                           | 559292                  |
+| Zebra Finch | Taeniopygia guttata | 59729 | 
 | Zebrafish     | Danio rerio                                                                     | 7955                    |
+| Zebu | Bos indicus | 9915 | 
+| Zika | Zika virus | 64320 | 
 
 ## Glycan Mass Library
 
