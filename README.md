@@ -471,6 +471,10 @@ York WS, Mazumder R, Ranzinger R, Edwards N, Kahsay R, Aoki-Kinoshita KF, Campbe
 
 Feng, Tingting, Jinyu Zhang, Zhiqian Chen, Wen Pan, Zhengrong Chen, Yongdong Yan, and Jianfeng Dai. “Glycosylation of Viral Proteins: Implication in Virus–Host Interaction and Virulence.” Virulence 13, no. 1 (n.d.): 670–83. https://doi.org/10.1080/21505594.2022.2060464.
 
+- Role of Protein Glycosylation in Interactions of Medically Relevant Fungi with the Host.
+
+Gómez-Gaviria, Manuela, Ana P. Vargas-Macías, Laura C. García-Carnero, Iván Martínez-Duncker, and Héctor M. Mora-Montes. “Role of Protein Glycosylation in Interactions of Medically Relevant Fungi with the Host.” Journal of Fungi 7, no. 10 (October 18, 2021): 875. https://doi.org/10.3390/jof7100875.
+
 # Appendix
 
 Additional information, logging runs, and references.
@@ -506,6 +510,8 @@ The script generates a log file that records the processing details of each prot
 2. Only N-linked glycosylation sequons are detected (no O-linked or other modifications).
 3. FASTA protein files contain new lines and or return carrages. When returning to the FASTA, remember this when searching for peptide in original sequence. 
 
+List all common names used in test_proteome folder.
+
 ```
 for file in ./test_proteomes/*; do
   filename=$(basename "$file")
@@ -516,7 +522,7 @@ done
 
 ## Test Proteomes
 
-Test proteome files from UniProt are available in the `test_proteomes` folder. Below is a list of species gathered. Only reviewed proteins were downloaded, and not every sequence available for a species is included. 
+Test proteome files from UniProt are available in the `test_proteomes` folder. Below is a list of species gathered. Only Swiss-Prot reviewed proteins were downloaded, and not every sequence available for a species is included. 
 
 I used these test proteomes to generate a zoo of glycopeptides under constrained conditions to fit into a GitHub repo. To build full zoo, remove constraints in batch processing script.
 
@@ -528,12 +534,14 @@ I used these test proteomes to generate a zoo of glycopeptides under constrained
 | Ant | Camponotus floridanus | 104421 |
 | Apple         | Malus domestica                                                                 | 3750                    |
 | Arabidopsis   | Arabidopsis thaliana                                                            | 3702                    |
-| Aspergillus | Aspergillus fumigata (strain ATCC MYA-4609 / CBS 101355 / FGSC A1100 / Af293) | 330879 |
+| Aspergillus fumigata | Aspergillus fumigata (strain ATCC MYA-4609 / CBS 101355 / FGSC A1100 / Af293) | 330879 |
+| Aspergillus nidulans | Emericella nidulans (strain FGSC A4 / ATCC 38163 / CBS 112.46 / NRRL 194 / M139) | 227321 |
 | Bat           | Myotis lucifugus                                                                | 59463                   |
 | Black Truffle | Tuber melanosporum (strain Mel28) | 656061 | 
 | Brown Alga | Ectocarpus siliculosus | 2880 |
 | Bushbaby | Otolemur garnettii | 30611 |
 | Camel | Camelus bactrianus | 9837 |
+| Candida albicans (Yeast, human pathogen) | Candida albicans (strain SC5314 / ATCC MYA-2876) | 237561 |
 | Cat           | Felis catus                                                                     | 9685                    |
 | C. elegans    | Caenorhabditis elegans                                                          | 6239                    |
 | Chameleon | Anolis carolinensis | 28377 |
@@ -544,16 +552,22 @@ I used these test proteomes to generate a zoo of glycopeptides under constrained
 | C. jejuni     | Campylobacter jejuni                                                            | 1951                    |
 | Cow           | Bos taurus                                                                      | 9913                    |
 | Crocodile | Crocodylus porosus | 8502 |
+| Crytococcus | Cryptococcus neoformans var. neoformans serotype D (strain JEC21 / ATCC MYA-565) | 214684|
+| Cytomegalovirus | Human cytomegalovirus (strain Merlin) | 295027 |
 | Corn Smut | Mycosarcoma maydis | 5270 |
 | Date Palm | Phoenix dactylifera | 42345 |
+| Debaryomyces hansenii (yeast) | Debaryomyces hansenii (strain ATCC 36239 / CBS 767 / BCRC 21394 / JCM 1990 / NBRC 0083 / IGC 2968) | 284592 |
 | Deer Tick | Ixodes scapularis | 6945 | 
+| Diatom | Thalassiosira pseudonana | 35128 |
 | Dictyostelium | Dictyostelium discoideum                                                        | 44689                   |
 | Dog           | Canis lupus familiaris                                                          | 9615                    |
 | Donkey        | Equus asinus                                                                    | 9796                    |
 | Duck          | Cairina moschata                                                                | 8855                    |
+| Dugbe Virus | Dugbe virus (isolate ArD44313) | 766194 |
 | Ebola | Zaire ebolavirus (strain Mayinga-76) | 128952 | 
 | Elephant      | Loxodonta africana (African Elephant)                                           | 9785                    |
 | Ferret | Mustela putorius furo | 9669 |
+| Fission Yeast | Schizosaccharomyces japonicus (strain yFS275 / FY16936) | 402676 |
 | Frog | Xenopus laevis | 8355 |
 | Fruit Fly     | Drosophila melanogaster                                                         | 7227                    |
 | Goat          | Capra hircus                                                                    | 9925                    |
@@ -574,30 +588,37 @@ I used these test proteomes to generate a zoo of glycopeptides under constrained
 | Influenza C | Influenza C virus (strain C/Ann Arbor/1/1950) | 11553 |
 | JEV | Japanese encephalitis virus (strain M28) | 2555554 |
 | Kidney Bean | Phaseolus vulgaris | 3885 |
+| Kluyveromyces lactis (lactate processing yeast) | Kluyveromyces lactis (strain ATCC 8585 / CBS 2359 / DSM 70799 / NBRC 1267 / NRRL Y-1140 / WM37) | 284590 |
 | LASV | Lassa virus (strain Mouse/Sierra Leone/Josiah/1976) | 11622 |
 | LCMV | Lymphocytic choriomeningitis virus (strain Armstrong) | 11624 |
 | Lemur | Microcebus murinus | 30608 |
 | Macaque (Rhesus monkey) | Macaca mulatta | 9544 |
 | Maize | Zea mays | 4577 |
+| Measles virus | Measles virus (strain Ichinose-B95a) | 645098 |
 | Monkey (cynomolgus, crab-eating) | Macaca fascicularis | 9541 |
 | Mosquito (African malaria) | Anopheles gambiae | 7165 |
 | Mouse         | Mus musculus                                                                    | 10090                   |
 | Naked Mole Rat | Heterocephalus glaber | 10181 |
 | Nematode (roundworm) | Caenorhabditis briggsae | 6238 |
+| Norovirus | Norovirus (strain Human/NoV/United States/Norwalk/1968/GI) | 524364 |
 | Opossum | Monodelphis domestica | 13616 | 
 | Orange | Citrus sinensis | 2711 |
 | Orangutan     | Pongo abelii                                                                    | 9601                    |
 | Oyster | Magallana gigas | 29159 |
+| Paramecium | Paramecium tetraurelia | 5888 |
 | Peach | Prunus persica | 3760 | 
 | Penicillium | Penicillium rubens (strain ATCC 28089 / DSM 1075 / NRRL 1951 / Wisconsin 54-1255) | 500485 | 
-| Pig           | Sus scrofa domesticus                                                           | 9823                    |
+| Pig (Domestic)           | Sus scrofa domesticus   | 9823                    |
 | Platypus | Ornithorhynchus anatinus | 9258 | 
+| Poplar Leaf Rust Fungus | Melampsora larici-populina (strain 98AG31 / pathotype 3-4-7) | 747676 |
 | Potato | Solanum tuberosum | 4113 |
 | Pufferfish | Takifugu rubripes | 31033 | 
 | Rabbit | Oryctolagus cuniculus | 9986 |
 | Rat           | Rattus norvegicus                                                               | 10116                   |
 | Red Alga | Cyanidioschyzon merolae (strain NIES-3377 / 10D) | 280699 |
 | Rice          | Oryza sativa subsp. japonica                                                    | 39947                   |
+| Rice Blast Fungus | Pyricularia oryzae (strain 70-15 / ATCC MYA-4617 / FGSC 8958) | 242507 |
+| Rice Fish (Japanese) | Oryzias latipes | 8090 | 
 | SARS-CoV      | SARS-CoV (Severe Acute Respiratory Syndrome Coronavirus)                        | 694009                  |
 | SFTSV | SFTS phlebovirus (isolate SFTSV/Human/China/HB29/2010) | 992212 |
 | Shark | Callorhinchus milii | 7868 | 
@@ -621,7 +642,7 @@ I used these test proteomes to generate a zoo of glycopeptides under constrained
 | Wild Rice (North America) | Oryza nivara | 4536 | 
 | WNV | West Nile virus | 11082 | 
 | Yak | Bos mutus grunniens | 30521 |
-| Yeast         | Saccharomyces cerevisiae (strain ATCC 204508 / S288c)                           | 559292                  |
+| Yeast (Budding)        | Saccharomyces cerevisiae (strain ATCC 204508 / S288c)                           | 559292                  |
 | Zebra Finch | Taeniopygia guttata | 59729 | 
 | Zebrafish     | Danio rerio                                                                     | 7955                    |
 | Zebu | Bos indicus | 9915 | 
