@@ -18,7 +18,7 @@ Peptides generated using trypsin digestion with 0 missed cleavages.
 Total Glycopeptide Sequences Found:   230892
 ---------------------------------------------------------------------------
 Batch Run Summary:
-Total Elapsed Time: 1.33 minutes
+Total Elapsed Time: 1.35 minutes
 Protease Used: trypsin
 Missed Cleavages: 0
 Glycosylation Type: N-Glycosylation

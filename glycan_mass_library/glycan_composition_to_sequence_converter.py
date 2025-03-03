@@ -11,8 +11,8 @@ def glycan_composition_to_sequence(glycan_composition):
     # Create a regex pattern based on the monosaccharides list
     pattern = '|'.join(monosaccharides)
     
-    # Initialize the glycan sequence
-    glycan_sequence = []
+    # Initialize the glycan sequence dictionary
+    glycan_sequence_dict = {mono: 0 for mono in monosaccharides}
     
     # Find all monosaccharide components and their counts using regex
     components = re.findall(rf'({pattern})(\d+)', glycan_composition)
@@ -21,10 +21,13 @@ def glycan_composition_to_sequence(glycan_composition):
         monosaccharide = component[0]
         count = int(component[1])
         
-        # Append the monosaccharide the number of times specified by count
-        glycan_sequence.extend([monosaccharide] * count)
+        # Update the count for the monosaccharide in the dictionary
+        glycan_sequence_dict[monosaccharide] += count
     
-    return ''.join(glycan_sequence)
+    # Create the ordered glycan sequence based on GLYCAN_MONOSACCHARIDES
+    glycan_sequence = ''.join([mono * glycan_sequence_dict[mono] for mono in monosaccharides])
+    
+    return glycan_sequence
 
 def process_glycan_data(input_file, output_file, glycan_column):
     # Load the CSV file into a pandas DataFrame

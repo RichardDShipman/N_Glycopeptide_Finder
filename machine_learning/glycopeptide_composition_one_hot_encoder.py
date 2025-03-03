@@ -4,24 +4,26 @@ import re
 import argparse
 import os
 
-# Define Encoding Definations
+# Define Encoding Definitions
 
 # Define Peptide (amino acid dictionary) (20 standard amino acids)
-AA_DICT = {aa: i for i, aa in enumerate("ACDEFGHIKLMNPQRSTVWY")}
-MAX_PEPTIDE_LENGTH = 50
+AA_DICT = {aa: i for i, aa in enumerate("ACDEFGHIKLMNPQRSTVWY")} # 'B' (Asx), 'Z' (Glx), 'U' (Sec), 'O' (Pyl) removed for simplicity
+MAX_PEPTIDE_LENGTH = 50 # defines the maximum length of the peptide sequence
 
 # Define Glycan (monosaccharide dictionary)
-GLYCAN_MONOSACCHARIDES = ['N', 'H', 'F', 'A'] # 'S', 'G', 'X', 'Ph', 'Su', 'aH' removed for simplicity
-MAX_GLYCAN_LENGTH = 30
+GLYCAN_MONOSACCHARIDES = ['N', 'H', 'F', 'A'] # 'G' (NeuGc), 'X' (Pent/Xylo), 'Ph' (Phospho), 'Su' (Sulfo), 'aH' (Hexuronic acid) removed for simplicity
+MAX_GLYCAN_LENGTH = 30 # defines the maximum length of the glycan sequence
 
-# Charge states (Max charge = 10)
-MAX_CHARGE = 10
+# Charge states (Max charge = 5)
+MAX_CHARGE = 5 # defines max charge state in the encoding
 
 def encode_peptide(peptide):
     """Encode peptide composition as a 50x20 matrix."""
     
+    # Initialize the encoding matrix
     encoding = np.zeros((MAX_PEPTIDE_LENGTH, len(AA_DICT)))
     
+    # Encode each amino acid in the peptide sequence
     for i, aa in enumerate(peptide[:MAX_PEPTIDE_LENGTH]):
         if aa in AA_DICT:
             encoding[i, AA_DICT[aa]] = 1
@@ -34,8 +36,8 @@ def glycan_composition_to_sequence(glycan_composition):
     # Create a regex pattern based on the monosaccharides list
     pattern = '|'.join(monosaccharides)
     
-    # Initialize the glycan sequence
-    glycan_sequence = []
+    # Initialize the glycan sequence dictionary
+    glycan_sequence_dict = {mono: 0 for mono in monosaccharides}
     
     # Find all monosaccharide components and their counts using regex
     components = re.findall(rf'({pattern})(\d+)', glycan_composition)
@@ -44,10 +46,13 @@ def glycan_composition_to_sequence(glycan_composition):
         monosaccharide = component[0]
         count = int(component[1])
         
-        # Append the monosaccharide the number of times specified by count
-        glycan_sequence.extend([monosaccharide] * count)
+        # Update the count for the monosaccharide in the dictionary
+        glycan_sequence_dict[monosaccharide] += count
     
-    return ''.join(glycan_sequence)
+    # Create the ordered glycan sequence based on GLYCAN_MONOSACCHARIDES
+    glycan_sequence = ''.join([mono * glycan_sequence_dict[mono] for mono in monosaccharides])
+    
+    return glycan_sequence
 
 def encode_glycan(glycan_sequence):
     # Define the possible monosaccharides and their corresponding index
@@ -77,10 +82,15 @@ def encode_charge(charge):
 
 def encode_glycopeptide(peptide, glycan, charge):
     """Create a feature vector from peptide composition, glycan composition, and charge state."""
+    
+    # Encode peptide, glycan, and charge
     peptide_encoded = encode_peptide(peptide)
     glycan_encoded = encode_glycan(glycan)
     charge_encoded = encode_charge(charge)
+
+    # Concatenate the encoded features into a single vector
     feature_vector = np.concatenate([peptide_encoded.flatten(), glycan_encoded.flatten(), charge_encoded.flatten()])
+    
     return feature_vector
 
 def generate_encoding_definition(output_file):
@@ -96,13 +106,23 @@ def generate_encoding_definition(output_file):
         encoding_definitions.append({'Type': 'Glycan', 'Position': f'1-{MAX_GLYCAN_LENGTH}', 'Feature': mono, 'Index': idx, 'Size': len(GLYCAN_MONOSACCHARIDES)})
 
     # Charge encoding
-    for i in range(1, 11):
-        encoding_definitions.append({'Type': 'Charge', 'Position': '1', 'Feature': f'Charge_{i}', 'Index': i-1, 'Size': 10})
+    for i in range(1, MAX_CHARGE + 1):  # Charge states from 1 to MAX_CHARGE
+        encoding_definitions.append({'Type': 'Charge', 'Position': '1', 'Feature': f'Charge_{i}', 'Index': i-1, 'Size': MAX_CHARGE})
+
+    # Add encoding size row
+    encoding_size = len(encoding_definitions)
+    encoding_definitions.append({'Type': 'Encoding_Size', 'Position': '-', 'Feature': '-', 'Index': '-', 'Size': encoding_size})
 
     # Convert to DataFrame and save as CSV
     df_definitions = pd.DataFrame(encoding_definitions)
     df_definitions.to_csv(output_file, index=False)
-    print(f"Encoding definition saved as '{output_file}'")
+    print(f"Encoding definition saved as '{output_file}', total encoding size: {encoding_size}")
+
+def count_ones_zeros(one_hot_vector):
+    """Count the number of 1s and 0s in a one-hot encoded vector."""
+    ones_count = np.sum(one_hot_vector)  # Count total 1s
+    zeros_count = len(one_hot_vector) - ones_count  # Total size - 1s gives 0s
+    return ones_count, zeros_count
 
 def main():
     parser = argparse.ArgumentParser(description="Encode glycopeptides with one-hot encoding.")
@@ -111,8 +131,9 @@ def main():
     parser.add_argument('-p', '--peptide', default='Peptide', help="Column name for peptide sequence (default: 'peptide')")
     parser.add_argument('-g', '--glycan', default='ShorthandGlycan', help="Column name for glycan composition (default: 'glycan')")
     parser.add_argument('-z', '--charge', default='Charge', help="Column name for charge state (default: 'charge')")
-    parser.add_argument('-d', '--definition', default=os.path.join('one_hot_encodings', 'encoding_definition.txt'), help="Output CSV file for encoding definition (default: 'one_hot_encodings/encoding_definition.txt')")
+    parser.add_argument('-d', '--definition', nargs='?', const=os.path.join('one_hot_encodings', 'encoding_definition.txt'), help="Output CSV file for encoding definition (default: 'one_hot_encodings/encoding_definition.txt')")
 
+    # Parse arguments
     args = parser.parse_args()
     
     input_file = args.input
@@ -132,8 +153,17 @@ def main():
     # Add glycan composition sequence as a new column
     df['Glycan_Composition_Sequence'] = df[glycan_col].apply(glycan_composition_to_sequence)
 
+    # Add glycopeptide sequence + charge with padding
+    df['Peptide_Padded'] = df[peptide_col].apply(lambda x: x.ljust(MAX_PEPTIDE_LENGTH, 'X'))
+    df['Glycan_Padded'] = df['Glycan_Composition_Sequence'].apply(lambda x: x.ljust(MAX_GLYCAN_LENGTH, 'X'))
+    df['Glycopeptide_Composition_Sequence'] = df['Peptide_Padded'] + df['Glycan_Padded'] + df[charge_col].astype(str)
+
     # Add the one-hot encoded data as a new column
     df['One_Hot_Encoding'] = [list(encoded_data[i]) for i in range(len(df))]
+
+    # Add the number of 1s and 0s in the one-hot encoding
+    df['Ones_Count'] = df['One_Hot_Encoding'].apply(lambda x: count_ones_zeros(x)[0])
+    df['Zeros_Count'] = df['One_Hot_Encoding'].apply(lambda x: count_ones_zeros(x)[1])
     
     # Save the output
     df.to_csv(output_file, index=False)
