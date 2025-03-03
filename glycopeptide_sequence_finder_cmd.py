@@ -308,6 +308,7 @@ def process_glycopeptides(peptide_file, glycans, max_charge):
                 'Site': pep['Site'],
                 'GlyToucan_AC': gly['glytoucan_ac'],
                 'Composition': gly['composition'],
+                'ShorthandGlycan': gly['shorthand_glycan'],
                 'Peptide': pep['Peptide'],
                 'Start': pep['Start'],
                 'End': pep['End'],
@@ -448,9 +449,9 @@ def calculate_n_glycopeptide_ions(peptide, glycan_composition, glycan_frag_order
         z_ions.append(round((cumulative + proton - NH3) / charge, 4))
 
     # --- Glycan Calculations ---
-    glycan_total_mass = sum(monosaccharide_library[sugar]['mass'] * count 
-                              for sugar, count in glycan_dict.items())
-    #intact_glycopeptide_mass = peptide_mass + glycan_total_mass
+    # glycan_total_mass = sum(monosaccharide_library[sugar]['mass'] * count 
+    #                           for sugar, count in glycan_dict.items())
+    # intact_glycopeptide_mass = peptide_mass + glycan_total_mass
 
     # --- Calculate Y ions (glycan-attached peptide fragments) ---
     Y_ions = {}
@@ -821,6 +822,9 @@ def main():
 
         # Process glycopeptides and compute m/z values
         glycopeptide_results = process_glycopeptides(output_file, glycans, charge_state)
+
+        # Add charge_state from input columns to the DataFrame
+        glycopeptide_results["Charge"] = charge_state
 
         # Compute IonSeries for glycopeptides
         if not glycopeptide_results.empty:
