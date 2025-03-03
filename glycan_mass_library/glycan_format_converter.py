@@ -8,7 +8,7 @@ SHORTHAND_TO_LONGHAND = {
     'N': 'HexNAc',
     'H': 'Hex',
     'F': 'Fuc',
-    'S': 'NeuAc',
+    'A': 'NeuAc',
     'G': 'NeuGc',
     'X': 'Pent',
     'Ph': 'Phospho',
